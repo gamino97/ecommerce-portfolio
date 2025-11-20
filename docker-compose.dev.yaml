@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:18.1-alpine
+    volumes:
+      - ecommerce-db-test:/var/lib/postgresql
+    environment:
+      POSTGRES_PASSWORD: example
+    ports:
+      - "5432:5432"
+  
+  adminer:
+    image: adminer
+    ports:
+      - 8080:8080
+
+networks:
+  default:
+    name: ecommerce-portfolio-dev
+
+volumes:
+  ecommerce-db-test:

@@ -1,0 +1,52 @@
+@baseUrl=http://localhost:8000
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzZjY5NTlmZi03NDFjLTRiMzktYjdmMC1mZTNkNmNjODAyY2QiLCJhdWQiOlsiZmFzdGFwaS11c2VyczphdXRoIl0sImV4cCI6MTc2MzU5NzM2NX0.-zbNUkImiJ93TW17fKjYgpYe7hd2R53O7pZ-Z_EohyY
+
+### Get root endpoint
+GET {{baseUrl}}/
+
+### Get info endpoint
+GET {{baseUrl}}/info
+
+### Get authenticated route (unauthorized)
+GET {{baseUrl}}/authenticated-route
+
+### Register a new user
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "password123",
+  "first_name": "Test",
+  "last_name": "User"
+}
+
+### Login user
+POST {{baseUrl}}/auth/jwt/login
+Content-Type: application/x-www-form-urlencoded
+
+username=test@example.com&password=password123
+
+### Get authenticated route (authorized)
+# First get the token from login, then use it in the header
+GET {{baseUrl}}/authenticated-route
+Authorization: Bearer {{token}}
+
+### Get user
+GET {{baseUrl}}/users/me
+Authorization: Bearer {{token}}
+
+### Update user
+PATCH {{baseUrl}}/users/me
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "first_name": "Updated",
+  "last_name": "User"
+}
+
+### Logout
+POST {{baseUrl}}/auth/jwt/logout
+Authorization: Bearer {{token}}
+
