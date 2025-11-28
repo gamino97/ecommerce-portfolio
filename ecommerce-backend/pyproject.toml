@@ -66,7 +66,16 @@ logging-modules = ["logging"]
 
 [dependency-groups]
 dev = [
+    "aiosqlite>=0.21.0",
     "black>=25.11.0",
+    "httpx>=0.28.1",
     "isort>=7.0.0",
+    "pytest>=9.0.1",
+    "pytest-asyncio>=1.3.0",
 ]
+
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 

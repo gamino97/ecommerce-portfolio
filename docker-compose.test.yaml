@@ -1,0 +1,16 @@
+services:
+  dbTest:
+    image: postgres:18.1-alpine
+    volumes:
+      - ecommerce-db-data-test:/var/lib/postgresql
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_PASSWORD: example
+
+networks:
+  default:
+    name: ecommerce-portfolio-test
+
+volumes:
+  ecommerce-db-data-test:

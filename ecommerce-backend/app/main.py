@@ -1,29 +1,11 @@
 from fastapi import Depends, FastAPI
-from typing_extensions import Annotated
 
 from app.db import User
+from app.routers import categories, products
 from app.schemas import UserCreate, UserRead, UserUpdate
 from app.users import auth_backend, current_active_user, fastapi_users
 
-from . import config
-
 app = FastAPI()
-
-
-@app.get("/")
-def root():
-    return {"message": "Hello World"}
-
-
-@app.get("/info")
-async def info(
-    settings: Annotated[config.Settings, Depends(config.get_settings)],
-):
-    return {
-        "app_name": settings.app_name,
-        "admin_email": settings.admin_email,
-        "items_per_user": settings.items_per_user,
-    }
 
 
 app.include_router(
@@ -50,6 +32,15 @@ app.include_router(
     fastapi_users.get_users_router(UserRead, UserUpdate),
     prefix="/users",
     tags=["users"],
+)
+
+app.include_router(
+    categories.router,
+    tags=["categories"],
+)
+app.include_router(
+    products.router,
+    tags=["products"],
 )
 
 
