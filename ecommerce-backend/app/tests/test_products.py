@@ -45,6 +45,22 @@ async def test_create_product(client: AsyncClient, category: Category):
 
 
 @pytest.mark.asyncio
+async def test_create_product_invalid_category(client: AsyncClient):
+    response = await client.post(
+        "/products/",
+        json={
+            "name": "Test Product",
+            "description": "A test product",
+            "image_url": "http://example.com/image.png",
+            "price": 10.99,
+            "stock": 100,
+            "category_id": "invalid_id",
+        },
+    )
+    assert response.status_code == 422
+
+
+@pytest.mark.asyncio
 async def test_read_product(client: AsyncClient, category: Category):
     # Create a product first
     create_response = await client.post(

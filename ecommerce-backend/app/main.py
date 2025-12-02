@@ -1,7 +1,7 @@
 from fastapi import Depends, FastAPI
 
 from app.db import User
-from app.routers import categories, products
+from app.routers import categories, customers, products
 from app.schemas import UserCreate, UserRead, UserUpdate
 from app.users import auth_backend, current_active_user, fastapi_users
 
@@ -41,6 +41,10 @@ app.include_router(
 app.include_router(
     products.router,
     tags=["products"],
+)
+app.include_router(
+    customers.router,
+    tags=["customers"],
 )
 
 
