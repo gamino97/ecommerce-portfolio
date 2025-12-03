@@ -1,5 +1,5 @@
 @baseUrl=http://localhost:8000
-@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzZjY5NTlmZi03NDFjLTRiMzktYjdmMC1mZTNkNmNjODAyY2QiLCJhdWQiOlsiZmFzdGFwaS11c2VyczphdXRoIl0sImV4cCI6MTc2MzU5NzM2NX0.-zbNUkImiJ93TW17fKjYgpYe7hd2R53O7pZ-Z_EohyY
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2ZmUzNTdmZC0zNjczLTRlZmUtYjM4Zi1lYTE1ODI2YzgyZTgiLCJhdWQiOlsiZmFzdGFwaS11c2VyczphdXRoIl0sImV4cCI6MTc2NDY0NDc2NH0.hCpzNSveO6ZI02vHrLdz6voLbE3Alf_U_RL9vhYVfBg
 
 ### Get root endpoint
 GET {{baseUrl}}/
@@ -25,7 +25,7 @@ Content-Type: application/json
 POST {{baseUrl}}/auth/jwt/login
 Content-Type: application/x-www-form-urlencoded
 
-username=test@example.com&password=password123
+username=test.user1@example.com&password=password123
 
 ### Get authenticated route (authorized)
 # First get the token from login, then use it in the header
@@ -50,3 +50,32 @@ Authorization: Bearer {{token}}
 POST {{baseUrl}}/auth/jwt/logout
 Authorization: Bearer {{token}}
 
+### Get categories
+GET {{baseUrl}}/categories
+Authorization: Bearer {{token}}
+
+### Create category
+POST {{baseUrl}}/categories
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Test Category"
+}
+
+### Create product
+POST {{baseUrl}}/products
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Test Product",
+  "description": "A test product",
+  "image_url": "http://example.com/image.png",
+  "price": 10.99,
+  "stock": 100,
+  "category_id": "9adbbdba-7e1e-461f-83e0-cdc6f6ec7966"
+}
+
+### Get products
+GET {{baseUrl}}/products

@@ -1,10 +1,11 @@
 import uuid
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 
 from app.db import Product, SessionDep
 from app.schemas import ProductCreate, ProductRead, ProductUpdate
+from app.users import current_superuser
 
 router = APIRouter()
 
@@ -29,6 +30,7 @@ async def read_product(product_id: uuid.UUID, session: SessionDep):
     "/products/",
     response_model=ProductRead,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(current_superuser)],
 )
 async def create_product(product: ProductCreate, session: SessionDep):
     db_product = Product(**product.model_dump())
@@ -38,7 +40,11 @@ async def create_product(product: ProductCreate, session: SessionDep):
     return db_product
 
 
-@router.patch("/products/{product_id}", response_model=ProductRead)
+@router.patch(
+    "/products/{product_id}",
+    response_model=ProductRead,
+    dependencies=[Depends(current_superuser)],
+)
 async def update_product(
     product_id: uuid.UUID, product_update: ProductUpdate, session: SessionDep
 ):

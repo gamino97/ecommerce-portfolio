@@ -1,3 +1,4 @@
+import contextlib
 from collections.abc import AsyncGenerator
 
 import pytest_asyncio
@@ -14,6 +15,12 @@ load_dotenv(".env.test", override=True)
 
 from app.db import DATABASE_URL, Base, get_async_session  # noqa: E402
 from app.main import app  # noqa: E402
+from app.users import (  # noqa: E402
+    UserCreate,
+    get_jwt_strategy,
+    get_user_db,
+    get_user_manager,
+)
 
 # Create engine with NullPool to avoid connection reuse issues
 engine = create_async_engine(DATABASE_URL, echo=False, poolclass=NullPool)
@@ -52,3 +59,24 @@ async def client(session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
         yield ac
 
     app.dependency_overrides.clear()
+
+
+@pytest_asyncio.fixture(scope="function")
+async def auth_client(session: AsyncSession, client: AsyncClient):
+    get_user_db_context = contextlib.asynccontextmanager(get_user_db)
+    get_user_manager_context = contextlib.asynccontextmanager(get_user_manager)
+    async with get_user_db_context(session) as user_db:
+        async with get_user_manager_context(user_db) as user_manager:
+            user = await user_manager.create(
+                UserCreate(
+                    email="test.user2@example.com",
+                    password="password123",
+                    is_superuser=True,
+                    first_name="Test",
+                    last_name="User",
+                )
+            )
+            print(f"User created {user}")
+    token = await get_jwt_strategy().write_token(user)
+    client.headers["Authorization"] = f"Bearer {token}"
+    yield client
