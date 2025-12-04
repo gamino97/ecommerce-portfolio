@@ -9,13 +9,11 @@ from app.db import Category, Product
 
 
 @pytest.fixture
-async def category(session: AsyncSession):
+async def category(
+    create_category: Callable[[str], Coroutine[None, None, Category]],
+):
     """Create a sample category for tests."""
-    category = Category(name="Test Category")
-    session.add(category)
-    await session.commit()
-    await session.refresh(category)
-    return category
+    return await create_category("Test Category")
 
 
 @pytest.fixture
@@ -108,6 +106,24 @@ async def test_create_product_invalid_category(auth_client: AsyncClient):
         },
     )
     assert response.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_create_product_nonexistent_category(auth_client: AsyncClient):
+    random_id = uuid.uuid4()
+    response = await auth_client.post(
+        "/products/",
+        json={
+            "name": "Test Product",
+            "description": "A test product",
+            "image_url": "http://example.com/image.png",
+            "price": 10.99,
+            "stock": 100,
+            "category_id": str(random_id),
+        },
+    )
+    assert response.status_code == 422
+    assert response.json()["detail"] == "Invalid category_id"
 
 
 @pytest.mark.asyncio
@@ -268,7 +284,7 @@ async def test_update_product_invalid_category(
         f"/products/{product_id}",
         json={"category_id": str(random_id)},
     )
-    assert response.status_code == 400
+    assert response.status_code == 422
     assert response.json()["detail"] == "Invalid category_id"
 
 
