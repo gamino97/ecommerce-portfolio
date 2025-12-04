@@ -1,7 +1,9 @@
+import datetime
 import uuid
 
 from fastapi_users import schemas
 from pydantic import BaseModel, ConfigDict
+from pydantic.types import condecimal
 
 
 class UserRead(schemas.BaseUser[uuid.UUID]):
@@ -38,7 +40,7 @@ class ProductRead(BaseModel):
     name: str
     description: str
     image_url: str
-    price: float
+    price: condecimal(gt=0)
     stock: int
     category_id: uuid.UUID
 
@@ -47,7 +49,7 @@ class ProductCreate(BaseModel):
     name: str
     description: str
     image_url: str
-    price: float
+    price: condecimal(gt=0)
     stock: int
     category_id: uuid.UUID
 
@@ -56,6 +58,6 @@ class ProductUpdate(BaseModel):
     name: str | None = None
     description: str | None = None
     image_url: str | None = None
-    price: float | None = None
+    price: condecimal(gt=0) | None = None
     stock: int | None = None
     category_id: uuid.UUID | None = None
