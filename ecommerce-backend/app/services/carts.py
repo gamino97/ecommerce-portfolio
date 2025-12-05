@@ -37,17 +37,21 @@ class CartService:
         cart_id: int,
         updated_cart: CartUpdate,
     ):
-
         cart = await session.get(Cart, cart_id)
         if not CartService.is_valid_cart(cart):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Cart not found"
             )
+        product_ids = list(updated_cart.items.keys())
+        if not product_ids:
+            return cart
+        result = await session.execute(
+            select(Product).where(Product.id.in_(product_ids))
+        )
+        products = result.scalars().all()
+        products_map = {p.id: p for p in products}
         for product_id, quantity in updated_cart.items.items():
-            result = await session.execute(
-                select(Product).where(Product.id == product_id)
-            )
-            product = result.scalars().one()
+            product = products_map.get(product_id)
             if not product:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
