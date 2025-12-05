@@ -99,6 +99,7 @@ class Cart(Base):
     created_at: Mapped[datetime] = mapped_column(default=func.now())
     items: Mapped[dict[str, Any]] = mapped_column(JSON(), default=dict)
     user: Mapped[User | None] = relationship("User", back_populates="carts")
+    is_active: Mapped[bool] = mapped_column(default=True)
 
 
 engine = create_async_engine(DATABASE_URL)

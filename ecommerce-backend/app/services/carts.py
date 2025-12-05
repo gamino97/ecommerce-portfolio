@@ -23,6 +23,15 @@ class CartService:
         return cart
 
     @staticmethod
+    async def get_cart(session: AsyncSession, cart_id: int):
+        cart = await session.get(Cart, cart_id)
+        if not CartService.is_valid_cart(cart):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Cart not found"
+            )
+        return cart
+
+    @staticmethod
     async def update_cart(
         session: AsyncSession,
         cart_id: int,
@@ -30,7 +39,7 @@ class CartService:
     ):
 
         cart = await session.get(Cart, cart_id)
-        if not cart:
+        if not CartService.is_valid_cart(cart):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Cart not found"
             )
@@ -52,3 +61,7 @@ class CartService:
             cart.items[str(product_id)] = quantity
         await session.commit()
         return cart
+
+    @staticmethod
+    def is_valid_cart(cart: Cart):
+        return cart and cart.is_active

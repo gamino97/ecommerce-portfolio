@@ -1,7 +1,7 @@
 from fastapi import APIRouter, status
 
 from app.db import SessionDep
-from app.schemas import CartUpdate
+from app.schemas import CartRead, CartUpdate
 from app.services.carts import CartService
 
 router = APIRouter()
@@ -27,3 +27,8 @@ async def update_cart(
     return await CartService.update_cart(
         session=session, cart_id=cart_id, updated_cart=updated_cart
     )
+
+
+@router.get("/carts/{cart_id}", response_model=CartRead)
+async def get_cart(cart_id: int, session: SessionDep):
+    return await CartService.get_cart(session=session, cart_id=cart_id)
