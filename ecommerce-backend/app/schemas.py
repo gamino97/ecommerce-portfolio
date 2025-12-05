@@ -1,8 +1,9 @@
 import datetime
 import uuid
+from typing import Annotated
 
 from fastapi_users import schemas
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from pydantic.types import condecimal
 
 
@@ -61,3 +62,22 @@ class ProductUpdate(BaseModel):
     price: condecimal(gt=0) | None = None
     stock: int | None = None
     category_id: uuid.UUID | None = None
+
+type CartItem = dict[uuid.UUID, Annotated[int, Field(gt=0)]]
+
+
+class CartRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    user_id: uuid.UUID | None
+    items: CartItem
+
+
+class CartCreate(BaseModel):
+    user_id: uuid.UUID | None = None
+    items: CartItem
+
+
+class CartUpdate(BaseModel):
+    user_id: uuid.UUID | None = None
+    items: CartItem

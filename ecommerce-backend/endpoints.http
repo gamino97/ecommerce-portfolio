@@ -1,5 +1,5 @@
 @baseUrl=http://localhost:8000
-@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2ZmUzNTdmZC0zNjczLTRlZmUtYjM4Zi1lYTE1ODI2YzgyZTgiLCJhdWQiOlsiZmFzdGFwaS11c2VyczphdXRoIl0sImV4cCI6MTc2NDY0NDc2NH0.hCpzNSveO6ZI02vHrLdz6voLbE3Alf_U_RL9vhYVfBg
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2ZmUzNTdmZC0zNjczLTRlZmUtYjM4Zi1lYTE1ODI2YzgyZTgiLCJhdWQiOlsiZmFzdGFwaS11c2VyczphdXRoIl0sImV4cCI6MTc2NDgxODU1Mn0.LwTjVKEcAqEwnioj73RO1xE4qYrSAZqRCZkuagIi_vk
 
 ### Get root endpoint
 GET {{baseUrl}}/
@@ -69,7 +69,7 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "name": "Test Product",
+  "name": "Test Product 1",
   "description": "A test product",
   "image_url": "http://example.com/image.png",
   "price": 10.99,

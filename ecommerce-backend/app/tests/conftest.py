@@ -1,6 +1,8 @@
 import contextlib
 from collections.abc import AsyncGenerator
+from typing import Callable, Coroutine
 
+import pytest
 import pytest_asyncio
 from dotenv import load_dotenv
 from httpx import ASGITransport, AsyncClient
@@ -13,7 +15,14 @@ from sqlalchemy.pool import NullPool
 
 load_dotenv(".env.test", override=True)
 
-from app.db import DATABASE_URL, Base, get_async_session  # noqa: E402
+from app.db import (  # noqa: E402
+    DATABASE_URL,
+    Base,
+    Category,
+    Product,
+    User,
+    get_async_session,
+)
 from app.main import app  # noqa: E402
 from app.users import (  # noqa: E402
     UserCreate,
@@ -62,7 +71,7 @@ async def client(session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
 
 
 @pytest_asyncio.fixture(scope="function")
-async def auth_client(session: AsyncSession, client: AsyncClient):
+async def super_user(session: AsyncSession) -> User:
     get_user_db_context = contextlib.asynccontextmanager(get_user_db)
     get_user_manager_context = contextlib.asynccontextmanager(get_user_manager)
     async with get_user_db_context(session) as user_db:
@@ -77,6 +86,50 @@ async def auth_client(session: AsyncSession, client: AsyncClient):
                 )
             )
             print(f"User created {user}")
-    token = await get_jwt_strategy().write_token(user)
+            return user
+
+
+@pytest_asyncio.fixture(scope="function")
+async def auth_client(super_user: User, client: AsyncClient):
+    token = await get_jwt_strategy().write_token(super_user)
     client.headers["Authorization"] = f"Bearer {token}"
     yield client
+
+
+@pytest.fixture
+async def category(
+    create_category: Callable[[str], Coroutine[None, None, Category]],
+):
+    """Create a sample category for tests."""
+    return await create_category("Test Category")
+
+
+@pytest.fixture
+def create_category(
+    session: AsyncSession,
+) -> Callable[[str], Coroutine[None, None, Category]]:
+    async def _create_category(name: str) -> Category:
+        category = Category(name=name)
+        session.add(category)
+        await session.commit()
+        await session.refresh(category)
+        return category
+
+    return _create_category
+
+
+@pytest.fixture
+async def product(session: AsyncSession, category: Category):
+    """Create a sample product for tests."""
+    product = Product(
+        name="Test Product",
+        description="A test product",
+        image_url="http://example.com/image.png",
+        price=10.99,
+        stock=100,
+        category_id=category.id,
+    )
+    session.add(product)
+    await session.commit()
+    await session.refresh(product)
+    return product

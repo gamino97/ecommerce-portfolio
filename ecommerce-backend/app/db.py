@@ -1,11 +1,12 @@
 from collections.abc import AsyncGenerator
 from datetime import datetime
-from typing import Annotated
+from typing import Annotated, Any
 from uuid import UUID
 
 from fastapi import Depends
 from fastapi_users.db import SQLAlchemyBaseUserTableUUID, SQLAlchemyUserDatabase
 from sqlalchemy import CheckConstraint, ForeignKey, Numeric, String
+from sqlalchemy.dialects.postgresql.json import JSON
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_sessionmaker,
@@ -28,6 +29,7 @@ class User(SQLAlchemyBaseUserTableUUID, Base):
     first_name: Mapped[str] = mapped_column(String(150))
     last_name: Mapped[str] = mapped_column(String(150))
     orders: Mapped[list["Order"]] = relationship(back_populates="user")
+    carts: Mapped[list["Cart"]] = relationship(back_populates="user")
 
 
 class Category(Base):
@@ -85,6 +87,18 @@ class OrderItem(Base):
     quantity: Mapped[int] = mapped_column()
     order: Mapped[Order] = relationship(back_populates="order_items")
     product: Mapped[Product] = relationship(back_populates="order_items")
+
+
+class Cart(Base):
+    __tablename__ = "carts"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("user.id"), nullable=True
+    )
+    created_at: Mapped[datetime] = mapped_column(default=func.now())
+    items: Mapped[dict[str, Any]] = mapped_column(JSON(), default=dict)
+    user: Mapped[User | None] = relationship("User", back_populates="carts")
 
 
 engine = create_async_engine(DATABASE_URL)

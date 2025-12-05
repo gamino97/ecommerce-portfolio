@@ -3,48 +3,8 @@ from typing import Callable, Coroutine
 
 import pytest
 from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db import Category, Product
-
-
-@pytest.fixture
-async def category(
-    create_category: Callable[[str], Coroutine[None, None, Category]],
-):
-    """Create a sample category for tests."""
-    return await create_category("Test Category")
-
-
-@pytest.fixture
-def create_category(
-    session: AsyncSession,
-) -> Callable[[str], Coroutine[None, None, Category]]:
-    async def _create_category(name: str) -> Category:
-        category = Category(name=name)
-        session.add(category)
-        await session.commit()
-        await session.refresh(category)
-        return category
-
-    return _create_category
-
-
-@pytest.fixture
-async def product(session: AsyncSession, category: Category):
-    """Create a sample product for tests."""
-    product = Product(
-        name="Test Product",
-        description="A test product",
-        image_url="http://example.com/image.png",
-        price=10.99,
-        stock=100,
-        category_id=category.id,
-    )
-    session.add(product)
-    await session.commit()
-    await session.refresh(product)
-    return product
 
 
 @pytest.mark.asyncio

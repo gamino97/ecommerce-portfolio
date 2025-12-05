@@ -1,0 +1,52 @@
+import uuid
+
+import pytest
+from fastapi.testclient import TestClient
+from httpx import AsyncClient
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.db import Cart, Product, User
+from app.main import app
+
+client = TestClient(app)
+
+
+@pytest.fixture
+async def cart(session: AsyncSession):
+    cart = Cart()
+    session.add(cart)
+    await session.commit()
+    return cart
+
+
+@pytest.mark.asyncio
+async def test_create_cart(session: AsyncSession, super_user: User):
+    product_id = str(uuid.uuid4())
+    user = super_user
+    cart = Cart(user_id=user.id, items={product_id: 1})
+    session.add(cart)
+    await session.commit()
+    assert cart.id is not None
+    assert cart.user == user
+    assert cart.items == {product_id: 1}
+
+
+@pytest.mark.asyncio
+async def test_create_cart_router(client: AsyncClient):
+    response = await client.post("/carts")
+    assert response.status_code == 201
+    assert type(response.json()) == str
+
+
+@pytest.mark.asyncio
+async def test_update_cart_router(
+    client: AsyncClient, cart: Cart, product: Product
+):
+    response = await client.put(
+        f"/carts/{cart.id}", json={"items": {str(product.id): 1}}
+    )
+    print(response.json())
+    assert response.status_code == 200
+    assert response.json()["items"] == {str(product.id): 1}
+    assert cart.items == {str(product.id): 1}
