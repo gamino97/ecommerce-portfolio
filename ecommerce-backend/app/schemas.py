@@ -1,9 +1,10 @@
 import datetime
+import decimal
 import uuid
 from typing import Annotated
 
 from fastapi_users import schemas
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, computed_field
 from pydantic.types import condecimal
 
 
@@ -62,6 +63,40 @@ class ProductUpdate(BaseModel):
     price: condecimal(gt=0) | None = None
     stock: int | None = None
     category_id: uuid.UUID | None = None
+
+
+class OrderItemRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    product_id: uuid.UUID
+    quantity: int
+    product: ProductRead
+
+
+class OrderRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    status: str
+    shipping_address: str = Field(min_length=1, max_length=200)
+    created_at: datetime.datetime
+    user_id: uuid.UUID
+    order_items: list[OrderItemRead]
+
+    @computed_field
+    def total_price(self) -> decimal.Decimal:
+        return sum(
+            item.product.price * item.quantity for item in self.order_items
+        )
+
+
+class OrderItemCreate(BaseModel):
+    product_id: uuid.UUID
+    quantity: int
+
+
+class OrderCreate(BaseModel):
+    shipping_address: str = Field(min_length=1, max_length=200)
+
 
 type CartItem = dict[uuid.UUID, Annotated[int, Field(gt=0)]]
 

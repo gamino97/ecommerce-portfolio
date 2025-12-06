@@ -18,6 +18,7 @@ load_dotenv(".env.test", override=True)
 from app.db import (  # noqa: E402
     DATABASE_URL,
     Base,
+    Cart,
     Category,
     Product,
     User,
@@ -133,3 +134,11 @@ async def product(session: AsyncSession, category: Category):
     await session.commit()
     await session.refresh(product)
     return product
+
+
+@pytest.fixture
+async def cart(session: AsyncSession):
+    cart = Cart()
+    session.add(cart)
+    await session.commit()
+    return cart

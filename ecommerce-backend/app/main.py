@@ -47,6 +47,10 @@ app.include_router(
     tags=["customers"],
 )
 app.include_router(
+    orders.router,
+    tags=["orders"],
+)
+app.include_router(
     carts.router,
     tags=["carts"],
 )

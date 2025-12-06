@@ -11,14 +11,6 @@ from app.main import app
 client = TestClient(app)
 
 
-@pytest.fixture
-async def cart(session: AsyncSession):
-    cart = Cart()
-    session.add(cart)
-    await session.commit()
-    return cart
-
-
 @pytest.mark.asyncio
 async def test_create_cart(session: AsyncSession, super_user: User):
     product_id = str(uuid.uuid4())

@@ -8,6 +8,7 @@ from fastapi_users.db import SQLAlchemyBaseUserTableUUID, SQLAlchemyUserDatabase
 from sqlalchemy import CheckConstraint, ForeignKey, Numeric, String
 from sqlalchemy.dialects.postgresql.json import JSON
 from sqlalchemy.ext.asyncio import (
+    AsyncAttrs,
     AsyncSession,
     async_sessionmaker,
     create_async_engine,
@@ -21,7 +22,7 @@ settings = get_settings()
 DATABASE_URL = settings.database_url
 
 
-class Base(DeclarativeBase):
+class Base(AsyncAttrs, DeclarativeBase):
     pass
 
 
@@ -69,7 +70,7 @@ class Order(Base):
     status: Mapped[str] = mapped_column(
         String, CheckConstraint("status IN ('pending', 'shipped', 'canceled')")
     )
-    shipping_address: Mapped[str | None] = mapped_column(String(200))
+    shipping_address: Mapped[str] = mapped_column(String(200))
     created_at: Mapped[datetime] = mapped_column(default=func.now())
     user_id: Mapped[UUID] = mapped_column(ForeignKey("user.id"))
     user: Mapped[User] = relationship(back_populates="orders")

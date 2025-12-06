@@ -52,16 +52,7 @@ class CartService:
         products_map = {p.id: p for p in products}
         for product_id, quantity in updated_cart.items.items():
             product = products_map.get(product_id)
-            if not product:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"Product {product_id} not found",
-                )
-            if quantity > product.stock:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Not enough stock for product {product.name}",
-                )
+            CartService.validate_product_stock(product_id, product, quantity)
             cart.items[str(product_id)] = quantity
         await session.commit()
         return cart
@@ -69,3 +60,22 @@ class CartService:
     @staticmethod
     def is_valid_cart(cart: Cart):
         return cart and cart.is_active
+
+    @staticmethod
+    def is_cart_empty(cart: Cart):
+        return not cart.items
+
+    @staticmethod
+    def validate_product_stock(
+        product_id: int, product: Product, quantity: int
+    ):
+        if not product:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Product {product_id} not found in cart",
+            )
+        if quantity > product.stock:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Not enough stock for product {product.name}",
+            )
