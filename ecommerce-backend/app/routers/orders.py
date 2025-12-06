@@ -5,7 +5,7 @@ from sqlalchemy.orm import selectinload
 from app.db import Order, OrderItem, Product, SessionDep, User
 from app.schemas import OrderCreate, OrderRead
 from app.services.orders import OrderService
-from app.users import current_active_user, current_active_user_optional
+from app.users import current_active_user
 
 router = APIRouter()
 
