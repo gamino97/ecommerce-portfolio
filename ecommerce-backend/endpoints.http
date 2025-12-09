@@ -1,5 +1,6 @@
 @baseUrl=http://localhost:8000
-@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2ZmUzNTdmZC0zNjczLTRlZmUtYjM4Zi1lYTE1ODI2YzgyZTgiLCJhdWQiOlsiZmFzdGFwaS11c2VyczphdXRoIl0sImV4cCI6MTc2NDgxODU1Mn0.LwTjVKEcAqEwnioj73RO1xE4qYrSAZqRCZkuagIi_vk
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2ZmUzNTdmZC0zNjczLTRlZmUtYjM4Zi1lYTE1ODI2YzgyZTgiLCJhdWQiOlsiZmFzdGFwaS11c2VyczphdXRoIl0sImV4cCI6MTc2NTI0NTYwN30.HicYycROSNvXcS20yYll0q6sC_j2V3Y_UH0w2PWRUF4
+@cart_id=2
 
 ### Get root endpoint
 GET {{baseUrl}}/
@@ -79,3 +80,32 @@ Authorization: Bearer {{token}}
 
 ### Get products
 GET {{baseUrl}}/products
+
+### Create cart
+POST {{baseUrl}}/carts
+
+
+### Get cart
+GET {{baseUrl}}/carts/{{cart_id}}
+
+
+### Add product to cart
+PUT {{baseUrl}}/carts/{{cart_id}}
+Content-Type: application/json
+
+
+{
+  "items": {
+    "f10cb059-b546-4b3c-b922-12ec7814afdf": "2"
+  }
+}
+
+### Create order
+POST {{baseUrl}}/carts/{{cart_id}}/orders
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "shipping_address": "123 Main St, Anytown, USA"
+}
+

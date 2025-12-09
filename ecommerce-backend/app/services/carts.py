@@ -50,10 +50,12 @@ class CartService:
         )
         products = result.scalars().all()
         products_map = {p.id: p for p in products}
+        items = cart.items.copy()
         for product_id, quantity in updated_cart.items.items():
             product = products_map.get(product_id)
             CartService.validate_product_stock(product_id, product, quantity)
-            cart.items[str(product_id)] = quantity
+            items[str(product_id)] = quantity
+        cart.items = items
         await session.commit()
         return cart
 
@@ -63,7 +65,12 @@ class CartService:
 
     @staticmethod
     def is_cart_empty(cart: Cart):
-        return not cart.items
+        if not cart.items:
+            return True
+        for quantity in cart.items.values():
+            if quantity > 0:
+                return False
+        return True
 
     @staticmethod
     def validate_product_stock(

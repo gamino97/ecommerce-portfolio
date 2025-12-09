@@ -7,7 +7,10 @@ from app.db import Cart, Product, User
 
 @pytest.mark.asyncio
 async def test_create_order(
-    auth_client: AsyncClient, product: Product, cart: Cart, super_user: User
+    auth_client: AsyncClient,
+    product: Product,
+    cart: Cart,
+    super_user: User,
 ):
     response = await auth_client.put(
         f"/carts/{cart.id}", json={"items": {str(product.id): 1}}
@@ -40,7 +43,20 @@ async def test_create_order_invalid_cart_id(auth_client: AsyncClient):
 
 
 @pytest.mark.asyncio
-async def test_create_order_cart_empty(auth_client: AsyncClient, cart: Cart):
+async def test_create_order_cart_empty(
+    auth_client: AsyncClient,
+    cart: Cart,
+    product: Product,
+):
+    response = await auth_client.post(
+        f"/carts/{cart.id}/orders/",
+        json={"shipping_address": "123 Main St, Anytown, USA"},
+    )
+    assert response.status_code == 400
+    assert response.json() == {"detail": "Cart is empty"}
+    cart.items = {str(product.id): 0}
+    await auth_client.put(f"/carts/{cart.id}", json={"items": cart.items})
+
     response = await auth_client.post(
         f"/carts/{cart.id}/orders/",
         json={"shipping_address": "123 Main St, Anytown, USA"},
@@ -51,7 +67,9 @@ async def test_create_order_cart_empty(auth_client: AsyncClient, cart: Cart):
 
 @pytest.mark.asyncio
 async def test_create_order_empty_shipping_address(
-    auth_client: AsyncClient, product: Product, cart: Cart
+    auth_client: AsyncClient,
+    product: Product,
+    cart: Cart,
 ):
     response = await auth_client.put(
         f"/carts/{cart.id}", json={"items": {str(product.id): 1}}
@@ -70,7 +88,10 @@ async def test_create_order_empty_shipping_address(
 
 @pytest.mark.asyncio
 async def test_create_order_too_long_shipping_address(
-    auth_client: AsyncClient, product: Product, cart: Cart, faker: Faker
+    auth_client: AsyncClient,
+    product: Product,
+    cart: Cart,
+    faker: Faker,
 ):
     response = await auth_client.put(
         f"/carts/{cart.id}", json={"items": {str(product.id): 1}}

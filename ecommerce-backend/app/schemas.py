@@ -98,7 +98,7 @@ class OrderCreate(BaseModel):
     shipping_address: str = Field(min_length=1, max_length=200)
 
 
-type CartItem = dict[uuid.UUID, Annotated[int, Field(gt=0)]]
+type CartItem = dict[uuid.UUID, Annotated[int, Field(ge=0)]]
 
 
 class CartRead(BaseModel):

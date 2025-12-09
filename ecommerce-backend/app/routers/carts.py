@@ -18,6 +18,7 @@ async def create_cart(session: SessionDep):
 
 @router.put(
     "/carts/{cart_id}",
+    response_model=CartRead,
 )
 async def update_cart(
     cart_id: int,

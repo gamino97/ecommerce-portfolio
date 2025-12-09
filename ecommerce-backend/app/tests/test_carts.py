@@ -86,3 +86,14 @@ async def test_get_cart(
     assert data["items"] == {str(product.id): 1}
     assert data["user_id"] == cart.user_id
     assert data["id"] == cart.id
+
+
+@pytest.mark.asyncio
+async def test_update_cart_product_invalid_quantity(
+    client: AsyncClient, cart: Cart, product: Product
+):
+    response = await client.put(
+        f"/carts/{cart.id}",
+        json={"items": {str(product.id): -1}},
+    )
+    assert response.status_code == 422

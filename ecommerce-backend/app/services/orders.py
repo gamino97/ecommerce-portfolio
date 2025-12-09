@@ -46,7 +46,7 @@ class OrderService:
             CartService.validate_product_stock(product_id, product, quantity)
             product.stock -= quantity
             order_item = OrderItem(
-                order_id=order.id,
+                order=order,
                 product=product,
                 quantity=quantity,
             )
