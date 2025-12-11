@@ -1,8 +1,9 @@
 import pytest
 from faker import Faker
 from httpx import AsyncClient
+from sqlalchemy.ext.asyncio.session import AsyncSession
 
-from app.db import Cart, Product, User
+from app.db import Cart, Order, OrderItem, Product, User
 
 
 @pytest.mark.asyncio
@@ -13,7 +14,7 @@ async def test_create_order(
     super_user: User,
 ):
     response = await auth_client.put(
-        f"/carts/{cart.id}", json={"items": {str(product.id): 1}}
+        f"/carts/{cart.id}", json={"items": {str(product.id): 12}}
     )
     assert response.status_code == 200
     response = await auth_client.post(
@@ -26,10 +27,10 @@ async def test_create_order(
     assert data["user_id"] == str(super_user.id)
     assert data["shipping_address"] == "123 Main St, Anytown, USA"
     assert data["order_items"][0]["product_id"] == str(product.id)
-    assert data["order_items"][0]["quantity"] == 1
+    assert data["order_items"][0]["quantity"] == 12
     assert data["created_at"] is not None
     assert data["status"] == "pending"
-    assert data["total_price"] == str(product.price)
+    assert data["total_price"] == str(product.price * 12)
 
 
 @pytest.mark.asyncio
@@ -106,3 +107,53 @@ async def test_create_order_too_long_shipping_address(
         response.json()["detail"][0]["msg"]
         == "String should have at most 200 characters"
     )
+
+
+@pytest.mark.asyncio
+async def test_count_orders_superuser(auth_client: AsyncClient):
+    response = await auth_client.get("/orders/count")
+    assert response.status_code == 200
+    assert response.json() == {"count": 0}
+
+
+@pytest.mark.asyncio
+async def test_count_orders_unauthorized(client: AsyncClient):
+    response = await client.get("/orders/count")
+    assert response.status_code == 401
+    assert response.json() == {"detail": "Unauthorized"}
+
+
+@pytest.mark.asyncio
+async def test_get_total_sales_price_superuser(
+    auth_client: AsyncClient,
+    product: Product,
+    session: AsyncSession,
+    super_user: User,
+):
+    response = await auth_client.get("/orders/total-sales")
+    assert response.status_code == 200
+    assert response.json() == {"total_sales": "0"}
+    order = Order(
+        user=super_user,
+        shipping_address="123 Main St, Anytown, USA",
+        status="pending",
+    )
+    session.add(order)
+    await session.flush()
+    order_item = OrderItem(
+        order=order,
+        product=product,
+        quantity=2,
+    )
+    session.add(order_item)
+    await session.commit()
+    response = await auth_client.get("/orders/total-sales")
+    assert response.status_code == 200
+    assert str(response.json().get("total_sales")) == str(product.price * 2)
+
+
+@pytest.mark.asyncio
+async def test_get_total_sales_price_unauthorized(client: AsyncClient):
+    response = await client.get("/orders/total-sales")
+    assert response.status_code == 401
+    assert response.json() == {"detail": "Unauthorized"}

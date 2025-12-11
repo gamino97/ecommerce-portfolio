@@ -1,11 +1,13 @@
+import decimal
+
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from app.db import Order, OrderItem, Product, SessionDep, User
-from app.schemas import OrderCreate, OrderRead
+from app.db import Order, SessionDep, User
+from app.schemas import OrderCreate, OrderRead, OrderReadWithUser
 from app.services.orders import OrderService
-from app.users import current_active_user
+from app.users import current_active_user, current_superuser
 
 router = APIRouter()
 
@@ -24,41 +26,31 @@ async def get_user_orders(
     return result.scalars().all()
 
 
-@router.get("/orders/count")
-async def count_orders(
+@router.get(
+    "/orders/",
+    response_model=list[OrderReadWithUser],
+    dependencies=[Depends(current_superuser)],
+)
+async def read_orders(
     session: SessionDep,
-    user: User = Depends(current_active_user),
 ):
-    query = select(func.count(Order.id)).where(Order.user_id == user.id)
-    result = await session.execute(query)
-    return {"count": result.scalar()}
-
-
-@router.get("/orders/total-sales")
-async def get_total_sales_price(
-    session: SessionDep,
-    user: User = Depends(current_active_user),
-):
-    # Calculate total sales for all the orders
-    query = (
-        select(func.sum(Product.price * OrderItem.quantity))
-        .join(OrderItem, OrderItem.product_id == Product.id)
-        .join(Order, Order.id == OrderItem.order_id)
+    query = select(Order).options(
+        selectinload(Order.order_items), selectinload(Order.user)
     )
     result = await session.execute(query)
-    total_sales = result.scalar() or 0
-    return {"total_sales": total_sales}
+    return result.scalars().all()
 
 
-@router.get("/orders/low-stock")
-async def get_low_stock_items(
+@router.get("/orders/count", dependencies=[Depends(current_superuser)])
+async def count_orders(session: SessionDep) -> dict[str, int]:
+    return await OrderService.get_all_orders_count(session)
+
+
+@router.get("/orders/total-sales", dependencies=[Depends(current_superuser)])
+async def get_total_sales_price(
     session: SessionDep,
-    user: User = Depends(current_active_user),
-):
-    query = select(Product).where(Product.stock < 30)
-    result = await session.execute(query)
-    products = result.scalars().all()
-    return products
+) -> dict[str, decimal.Decimal]:
+    return await OrderService.get_total_sales_price(session)
 
 
 @router.get("/orders/{order_id}", response_model=OrderRead)

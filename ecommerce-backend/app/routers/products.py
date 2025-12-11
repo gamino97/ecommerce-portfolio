@@ -5,6 +5,7 @@ from sqlalchemy import select
 
 from app.db import Category, Product, SessionDep
 from app.schemas import ProductCreate, ProductRead, ProductUpdate
+from app.services.products import ProductsService
 from app.users import current_superuser
 
 router = APIRouter()
@@ -73,3 +74,10 @@ async def update_product(
     await session.commit()
     await session.refresh(db_product)
     return db_product
+
+
+@router.get(
+    "/products/low-stock/count", dependencies=[Depends(current_superuser)]
+)
+async def get_low_stock_products_count(session: SessionDep) -> dict[str, int]:
+    return await ProductsService.get_low_stock_products_count(session)

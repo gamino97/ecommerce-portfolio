@@ -1,5 +1,8 @@
+import decimal
+from typing import cast
+
 from fastapi import HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from sqlalchemy.orm.strategy_options import selectinload
 
@@ -23,6 +26,7 @@ class OrderService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Cart is not active",
             )
+        cart = cast(Cart, cart)
         if CartService.is_cart_empty(cart):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -44,6 +48,7 @@ class OrderService:
         for product_id, quantity in cart.items.items():
             product = products_map.get(product_id)
             CartService.validate_product_stock(product_id, product, quantity)
+            product = cast(Product, product)
             product.stock -= quantity
             order_item = OrderItem(
                 order=order,
@@ -64,3 +69,22 @@ class OrderService:
         result = await session.execute(query)
         created_order = result.scalar_one()
         return created_order
+
+    @staticmethod
+    async def get_all_orders_count(session: AsyncSession) -> dict[str, int]:
+        query = select(func.count()).select_from(Order)
+        result = await session.execute(query)
+        return {"count": result.scalar() or 0}
+
+    @staticmethod
+    async def get_total_sales_price(
+        session: AsyncSession,
+    ) -> dict[str, decimal.Decimal]:
+        query = (
+            select(func.sum(Product.price * OrderItem.quantity))
+            .select_from(Order)
+            .join(Order.order_items)
+            .join(OrderItem.product)
+        )
+        result = await session.execute(query)
+        return {"total_sales": decimal.Decimal(result.scalar() or 0)}

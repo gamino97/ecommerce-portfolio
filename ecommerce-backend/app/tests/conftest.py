@@ -137,6 +137,29 @@ async def product(session: AsyncSession, category: Category):
 
 
 @pytest.fixture
+def create_product(
+    session: AsyncSession,
+):
+    async def _create_product(
+        name: str, category: Category, price: str = "10.99", stock: int = 100
+    ) -> Product:
+        product = Product(
+            name=name,
+            description="A test product",
+            image_url="http://example.com/image.png",
+            price=price,
+            stock=stock,
+            category_id=category.id,
+        )
+        session.add(product)
+        await session.commit()
+        await session.refresh(product)
+        return product
+
+    return _create_product
+
+
+@pytest.fixture
 async def cart(session: AsyncSession):
     cart = Cart()
     session.add(cart)

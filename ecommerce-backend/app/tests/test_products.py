@@ -262,3 +262,31 @@ async def test_update_nonexistent_product(auth_client: AsyncClient):
         f"/products/{random_id}", json={"price": 100.00}
     )
     assert response.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_get_low_stock_products_count(auth_client: AsyncClient):
+    response = await auth_client.get("/products/low-stock/count")
+    assert response.status_code == 200
+    assert response.json()["count"] == 0
+
+
+@pytest.mark.asyncio
+async def test_get_low_stock_products_count_many(
+    auth_client: AsyncClient,
+    create_product,
+    category: Category,
+):
+    await create_product("Product 1", stock=20, category=category)
+    await create_product("Product 2", category=category)
+    await create_product("Product 3", category=category)
+    response = await auth_client.get("/products/low-stock/count")
+    assert response.status_code == 200
+    assert response.json()["count"] == 1
+
+
+@pytest.mark.asyncio
+async def test_get_low_stock_products_count_unauthorized(client: AsyncClient):
+    response = await client.get("/products/low-stock/count")
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Unauthorized"

@@ -89,6 +89,10 @@ class OrderRead(BaseModel):
         )
 
 
+class OrderReadWithUser(OrderRead):
+    user: UserRead
+
+
 class OrderItemCreate(BaseModel):
     product_id: uuid.UUID
     quantity: int
