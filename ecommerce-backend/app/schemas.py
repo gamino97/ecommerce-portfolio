@@ -79,7 +79,6 @@ class OrderRead(BaseModel):
     status: str
     shipping_address: str = Field(min_length=1, max_length=200)
     created_at: datetime.datetime
-    user_id: uuid.UUID
     order_items: list[OrderItemRead]
 
     @computed_field

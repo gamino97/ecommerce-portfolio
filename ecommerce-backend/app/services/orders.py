@@ -1,5 +1,5 @@
 import decimal
-from typing import cast
+from typing import Sequence, cast
 
 from fastapi import HTTPException, status
 from sqlalchemy import func, select
@@ -12,6 +12,16 @@ from app.services.carts import CartService
 
 
 class OrderService:
+
+    @staticmethod
+    async def get_all_orders(session: AsyncSession) -> Sequence[Order]:
+        query = select(Order).options(
+            selectinload(Order.user),
+            selectinload(Order.order_items).selectinload(OrderItem.product),
+        )
+        result = await session.execute(query)
+        return result.scalars().all()
+
     @staticmethod
     async def create_order(
         session: AsyncSession,

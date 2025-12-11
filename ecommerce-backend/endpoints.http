@@ -1,5 +1,5 @@
 @baseUrl=http://localhost:8000
-@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2ZmUzNTdmZC0zNjczLTRlZmUtYjM4Zi1lYTE1ODI2YzgyZTgiLCJhdWQiOlsiZmFzdGFwaS11c2VyczphdXRoIl0sImV4cCI6MTc2NTI0NTYwN30.HicYycROSNvXcS20yYll0q6sC_j2V3Y_UH0w2PWRUF4
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2ZmUzNTdmZC0zNjczLTRlZmUtYjM4Zi1lYTE1ODI2YzgyZTgiLCJhdWQiOlsiZmFzdGFwaS11c2VyczphdXRoIl0sImV4cCI6MTc2NTQzMTg1Mn0.lKiEuuqG9xs2uu6WwDSUR5MZITh2lFWS0_TjvfSMP6c
 @cart_id=2
 
 ### Get root endpoint
@@ -109,3 +109,7 @@ Authorization: Bearer {{token}}
   "shipping_address": "123 Main St, Anytown, USA"
 }
 
+
+### Get orders
+GET {{baseUrl}}/orders
+Authorization: Bearer {{token}}

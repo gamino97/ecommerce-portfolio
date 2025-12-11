@@ -4,6 +4,7 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
 from app.db import Cart, Order, OrderItem, Product, User
+from app.schemas import OrderRead, OrderReadWithUser
 
 
 @pytest.mark.asyncio
@@ -24,7 +25,6 @@ async def test_create_order(
     assert response.status_code == 201
     data = response.json()
     assert data["id"] is not None
-    assert data["user_id"] == str(super_user.id)
     assert data["shipping_address"] == "123 Main St, Anytown, USA"
     assert data["order_items"][0]["product_id"] == str(product.id)
     assert data["order_items"][0]["quantity"] == 12
@@ -157,3 +157,44 @@ async def test_get_total_sales_price_unauthorized(client: AsyncClient):
     response = await client.get("/orders/total-sales")
     assert response.status_code == 401
     assert response.json() == {"detail": "Unauthorized"}
+
+
+@pytest.mark.asyncio
+async def test_get_all_orders_superuser(auth_client: AsyncClient):
+    response = await auth_client.get("/orders/")
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+@pytest.mark.asyncio
+async def test_get_all_orders_unauthorized(client: AsyncClient):
+    response = await client.get("/orders/")
+    assert response.status_code == 401
+    assert response.json() == {"detail": "Unauthorized"}
+
+
+@pytest.mark.asyncio
+async def test_get_all_orders_order_schema_validation(
+    auth_client: AsyncClient,
+    product: Product,
+    cart: Cart,
+):
+    response = await auth_client.put(
+        f"/carts/{cart.id}", json={"items": {str(product.id): 5}}
+    )
+    assert response.status_code == 200
+    response = await auth_client.post(
+        f"/carts/{cart.id}/orders/",
+        json={"shipping_address": "456 Schema Ln, Validate City, VC"},
+    )
+    assert response.status_code == 201
+    response = await auth_client.get("/orders/")
+    assert response.status_code == 200
+    data_list = response.json()
+    assert len(data_list) == 1
+    data = data_list[0]
+    order = OrderReadWithUser.model_validate(data)
+    assert order.shipping_address == "456 Schema Ln, Validate City, VC"
+    assert len(order.order_items) == 1
+    assert order.order_items[0].product_id == product.id
+    assert order.total_price == product.price * 5

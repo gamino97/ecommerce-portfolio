@@ -34,11 +34,7 @@ async def get_user_orders(
 async def read_orders(
     session: SessionDep,
 ):
-    query = select(Order).options(
-        selectinload(Order.order_items), selectinload(Order.user)
-    )
-    result = await session.execute(query)
-    return result.scalars().all()
+    return await OrderService.get_all_orders(session)
 
 
 @router.get("/orders/count", dependencies=[Depends(current_superuser)])
