@@ -4,6 +4,7 @@ from typing import Callable, Coroutine
 import pytest
 from httpx import AsyncClient
 
+import app.routers.products
 from app.db import Category, Product
 
 
@@ -152,6 +153,31 @@ async def test_create_product_price_negative(
         "stock": 100,
         "category_id": str(category.id),
     }
+    response = await auth_client.post(
+        "/products/",
+        json=product_information,
+    )
+    assert response.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_create_product_price_invalid(
+    auth_client: AsyncClient, category: Category
+):
+    product_information = {
+        "name": "Test Product",
+        "description": "A test product",
+        "image_url": "http://example.com/image.png",
+        "price": 0,
+        "stock": 100,
+        "category_id": str(category.id),
+    }
+    response = await auth_client.post(
+        "/products/",
+        json=product_information,
+    )
+    assert response.status_code == 422
+    product_information["price"] = 10.99999998
     response = await auth_client.post(
         "/products/",
         json=product_information,

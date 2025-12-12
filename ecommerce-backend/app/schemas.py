@@ -11,6 +11,7 @@ from pydantic.types import condecimal
 class UserRead(schemas.BaseUser[uuid.UUID]):
     first_name: str
     last_name: str
+    created_at: datetime.datetime
 
 
 class UserCreate(schemas.BaseUserCreate):
@@ -26,6 +27,7 @@ class UserUpdate(schemas.BaseUserUpdate):
 class CategoryRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     name: str
+    id: uuid.UUID
 
 
 class CategoryCreate(CategoryRead):
@@ -36,13 +38,18 @@ class CategoryUpdate(CategoryRead):
     pass
 
 
+type ProductPrice = Annotated[
+    decimal.Decimal, Field(allow_inf_nan=False, decimal_places=2, gt=0)
+]
+
+
 class ProductRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: uuid.UUID
     name: str
     description: str
     image_url: str
-    price: condecimal(gt=0)
+    price: ProductPrice
     stock: int
     category_id: uuid.UUID
 
@@ -51,7 +58,7 @@ class ProductCreate(BaseModel):
     name: str
     description: str
     image_url: str
-    price: condecimal(gt=0)
+    price: ProductPrice
     stock: int
     category_id: uuid.UUID
 
@@ -60,7 +67,7 @@ class ProductUpdate(BaseModel):
     name: str | None = None
     description: str | None = None
     image_url: str | None = None
-    price: condecimal(gt=0) | None = None
+    price: ProductPrice | None = None
     stock: int | None = None
     category_id: uuid.UUID | None = None
 

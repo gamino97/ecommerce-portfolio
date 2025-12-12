@@ -1,5 +1,5 @@
 @baseUrl=http://localhost:8000
-@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2ZmUzNTdmZC0zNjczLTRlZmUtYjM4Zi1lYTE1ODI2YzgyZTgiLCJhdWQiOlsiZmFzdGFwaS11c2VyczphdXRoIl0sImV4cCI6MTc2NTQzMTg1Mn0.lKiEuuqG9xs2uu6WwDSUR5MZITh2lFWS0_TjvfSMP6c
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2ZmUzNTdmZC0zNjczLTRlZmUtYjM4Zi1lYTE1ODI2YzgyZTgiLCJhdWQiOlsiZmFzdGFwaS11c2VyczphdXRoIl0sImV4cCI6MTc2NTU3MTkxNn0.H4ws_Z_UtrhBvEp4E7V4_hOGH6RfEcwh9D6VbEJQQOY
 @cart_id=2
 
 ### Get root endpoint
@@ -53,7 +53,6 @@ Authorization: Bearer {{token}}
 
 ### Get categories
 GET {{baseUrl}}/categories
-Authorization: Bearer {{token}}
 
 ### Create category
 POST {{baseUrl}}/categories
@@ -112,4 +111,8 @@ Authorization: Bearer {{token}}
 
 ### Get orders
 GET {{baseUrl}}/orders
+Authorization: Bearer {{token}}
+
+### Get order
+GET {{baseUrl}}/orders/1
 Authorization: Bearer {{token}}

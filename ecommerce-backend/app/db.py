@@ -29,6 +29,7 @@ class Base(AsyncAttrs, DeclarativeBase):
 class User(SQLAlchemyBaseUserTableUUID, Base):
     first_name: Mapped[str] = mapped_column(String(150))
     last_name: Mapped[str] = mapped_column(String(150))
+    created_at: Mapped[datetime] = mapped_column(default=func.now())
     orders: Mapped[list["Order"]] = relationship(back_populates="user")
     carts: Mapped[list["Cart"]] = relationship(back_populates="user")
 

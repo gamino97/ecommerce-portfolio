@@ -1,4 +1,5 @@
 import decimal
+from os import stat
 from typing import Sequence, cast
 
 from fastapi import HTTPException, status
@@ -21,6 +22,28 @@ class OrderService:
         )
         result = await session.execute(query)
         return result.scalars().all()
+
+    @staticmethod
+    async def get_order(
+        session: AsyncSession, order_id: int, user: User
+    ) -> Order:
+        query = (
+            select(Order)
+            .options(
+                selectinload(Order.user),
+                selectinload(Order.order_items).selectinload(OrderItem.product),
+            )
+            .where(Order.id == order_id)
+        )
+        if not user.is_superuser:
+            query = query.where(Order.user_id == user.id)
+        result = await session.execute(query)
+        order = result.scalar_one_or_none()
+        if not order:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Order not found"
+            )
+        return order
 
     @staticmethod
     async def create_order(

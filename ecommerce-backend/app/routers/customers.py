@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends
-from sqlalchemy import select
 
-from app.db import SessionDep, User
+from app.db import SessionDep
 from app.schemas import UserRead
 from app.services.customers import CustomerService
 from app.users import current_superuser
@@ -16,8 +15,7 @@ router = APIRouter()
     dependencies=[Depends(current_superuser)],
 )
 async def read_customers(session: SessionDep):
-    result = await session.execute(select(User))
-    return result.scalars().all()
+    return await CustomerService.get_customers(session)
 
 
 @router.get(

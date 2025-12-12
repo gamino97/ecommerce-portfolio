@@ -40,6 +40,15 @@ TestingSessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 @pytest_asyncio.fixture(scope="function", autouse=True)
 async def prepare_database():
     """Create tables before each test and drop them after."""
+    yield
+    async with engine.begin() as conn:
+        for tbl in reversed(Base.metadata.sorted_tables):
+            await conn.execute(tbl.delete())
+
+
+@pytest_asyncio.fixture(scope="session", autouse=True)
+async def prepare_database_cleanup():
+    """Create tables before each test and drop them after."""
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     yield
@@ -48,7 +57,7 @@ async def prepare_database():
 
 
 @pytest_asyncio.fixture(scope="function")
-async def session(prepare_database) -> AsyncGenerator[AsyncSession, None]:
+async def session() -> AsyncGenerator[AsyncSession, None]:
     """Provide a transactional session for tests."""
     async with TestingSessionLocal() as session:
         yield session
@@ -88,6 +97,24 @@ async def super_user(session: AsyncSession) -> User:
             )
             print(f"User created {user}")
             return user
+
+
+@pytest.fixture
+async def user(session: AsyncSession) -> User:
+    """Create a sample user for tests."""
+    user = User(
+        email="test@example.com",
+        hashed_password="hashedpassword",
+        is_active=True,
+        is_superuser=False,
+        is_verified=True,
+        first_name="Test",
+        last_name="User",
+    )
+    session.add(user)
+    await session.commit()
+    await session.refresh(user)
+    return user
 
 
 @pytest_asyncio.fixture(scope="function")

@@ -49,24 +49,13 @@ async def get_total_sales_price(
     return await OrderService.get_total_sales_price(session)
 
 
-@router.get("/orders/{order_id}", response_model=OrderRead)
+@router.get("/orders/{order_id}", response_model=OrderReadWithUser)
 async def get_order(
     order_id: int,
     session: SessionDep,
     user: User = Depends(current_active_user),
 ):
-    query = (
-        select(Order)
-        .options(selectinload(Order.order_items))
-        .where(Order.id == order_id, Order.user_id == user.id)
-    )
-    result = await session.execute(query)
-    order = result.scalar_one_or_none()
-    if not order:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Order not found"
-        )
-    return order
+    return await OrderService.get_order(session, order_id, user)
 
 
 @router.post(

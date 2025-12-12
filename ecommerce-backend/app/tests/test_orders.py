@@ -12,11 +12,13 @@ async def test_create_order(
     auth_client: AsyncClient,
     product: Product,
     cart: Cart,
+    session: AsyncSession,
     super_user: User,
 ):
     response = await auth_client.put(
         f"/carts/{cart.id}", json={"items": {str(product.id): 12}}
     )
+    initial_product_stock = product.stock
     assert response.status_code == 200
     response = await auth_client.post(
         f"/carts/{cart.id}/orders/",
@@ -31,6 +33,8 @@ async def test_create_order(
     assert data["created_at"] is not None
     assert data["status"] == "pending"
     assert data["total_price"] == str(product.price * 12)
+    await session.refresh(product)
+    assert product.stock == initial_product_stock - 12
 
 
 @pytest.mark.asyncio
@@ -198,3 +202,27 @@ async def test_get_all_orders_order_schema_validation(
     assert len(order.order_items) == 1
     assert order.order_items[0].product_id == product.id
     assert order.total_price == product.price * 5
+
+
+@pytest.mark.asyncio
+async def test_get_order(
+    auth_client: AsyncClient, product: Product, cart: Cart
+):
+    response = await auth_client.put(
+        f"/carts/{cart.id}", json={"items": {str(product.id): 5}}
+    )
+    assert response.status_code == 200
+    response = await auth_client.post(
+        f"/carts/{cart.id}/orders/",
+        json={"shipping_address": "456 Schema Ln, Validate City, VC"},
+    )
+    assert response.status_code == 201
+    order_id = response.json()["id"]
+    response = await auth_client.get(f"/orders/{order_id}")
+    assert response.status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_get_order_unauthorized(client: AsyncClient):
+    response = await client.get("/orders/1")
+    assert response.status_code == 401
