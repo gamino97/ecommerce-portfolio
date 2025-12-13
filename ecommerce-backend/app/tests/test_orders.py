@@ -114,6 +114,39 @@ async def test_create_order_too_long_shipping_address(
 
 
 @pytest.mark.asyncio
+async def test_create_order_invalid_quantity(
+    auth_client: AsyncClient,
+    product: Product,
+    cart: Cart,
+):
+    response = await auth_client.put(
+        f"/carts/{cart.id}", json={"items": {str(product.id): -1}}
+    )
+    assert response.status_code == 422
+    assert (
+        response.json()["detail"][0]["msg"]
+        == "Input should be greater than or equal to 0"
+    )
+
+
+@pytest.mark.asyncio
+async def test_create_order_too_many_items(
+    auth_client: AsyncClient,
+    product: Product,
+    cart: Cart,
+):
+    response = await auth_client.put(
+        f"/carts/{cart.id}",
+        json={"items": {str(product.id): product.stock + 2}},
+    )
+    assert response.status_code == 400
+    assert (
+        response.json()["detail"]
+        == f"Not enough stock for product {product.name}"
+    )
+
+
+@pytest.mark.asyncio
 async def test_count_orders_superuser(auth_client: AsyncClient):
     response = await auth_client.get("/orders/count")
     assert response.status_code == 200

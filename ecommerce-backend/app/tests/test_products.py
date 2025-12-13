@@ -168,7 +168,7 @@ async def test_create_product_price_invalid(
         "name": "Test Product",
         "description": "A test product",
         "image_url": "http://example.com/image.png",
-        "price": 0,
+        "price": "0.0",
         "stock": 100,
         "category_id": str(category.id),
     }
@@ -177,7 +177,13 @@ async def test_create_product_price_invalid(
         json=product_information,
     )
     assert response.status_code == 422
-    product_information["price"] = 10.99999998
+    product_information["price"] = "10.99999998"
+    response = await auth_client.post(
+        "/products/",
+        json=product_information,
+    )
+    assert response.status_code == 422
+    product_information["price"] = "-19"
     response = await auth_client.post(
         "/products/",
         json=product_information,
