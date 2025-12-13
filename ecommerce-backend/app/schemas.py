@@ -78,6 +78,7 @@ class OrderItemRead(BaseModel):
     product_id: uuid.UUID
     quantity: int
     product: ProductRead
+    price: ProductPrice
 
 
 class OrderRead(BaseModel):
@@ -91,7 +92,8 @@ class OrderRead(BaseModel):
     @computed_field
     def total_price(self) -> decimal.Decimal:
         return sum(
-            item.product.price * item.quantity for item in self.order_items
+            (item.price * item.quantity for item in self.order_items),
+            start=decimal.Decimal(0),
         )
 
 

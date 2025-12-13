@@ -1,3 +1,4 @@
+import decimal
 from collections.abc import AsyncGenerator
 from datetime import datetime
 from typing import Annotated, Any
@@ -89,6 +90,7 @@ class OrderItem(Base):
     quantity: Mapped[int] = mapped_column()
     order: Mapped[Order] = relationship(back_populates="order_items")
     product: Mapped[Product] = relationship(back_populates="order_items")
+    price: Mapped[decimal.Decimal] = mapped_column(Numeric(10, 2))
 
 
 class Cart(Base):

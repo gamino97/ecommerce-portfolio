@@ -87,6 +87,7 @@ class OrderService:
                 order=order,
                 product=product,
                 quantity=quantity,
+                price=product.price,
             )
             session.add(order_item)
         cart.is_active = False

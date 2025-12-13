@@ -181,6 +181,7 @@ async def test_get_total_sales_price_superuser(
         order=order,
         product=product,
         quantity=2,
+        price=product.price,
     )
     session.add(order_item)
     await session.commit()
