@@ -92,7 +92,7 @@ export default async function OrderPage(
                         Intl.NumberFormat('en-US', {
                           style: 'currency',
                           currency: 'USD',
-                        }).format(item.product.price) : '-'}
+                        }).format(item.price) : '-'}
                     </TableCell>
                   </TableRow>
                 ))}

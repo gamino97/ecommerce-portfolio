@@ -1,4 +1,3 @@
-import { OrderWithProfilesAndItems } from '@/services/orders';
 import { z } from 'zod';
 import { ArrayElement, Optional } from '.';
 import { Product } from '@/services/products';
@@ -17,7 +16,7 @@ export const orderItemSchema = z.object({
   quantity: z.number({ message: 'Quantity is required' }).int().positive({ message: 'Quantity must be at least 1' }),
 });
 
-export type OrderItem = z.infer<typeof orderItemSchema>;
+export type OrderItem = z.infer<typeof orderItemSchema> & {price: number};
 
 export const orderSchema = z.object({
   customerId: z.string({ message: 'Customer is required' }),
@@ -36,7 +35,7 @@ export const defaultOrderValues: Partial<OrderValidator> = {
   items: [],
 };
 
-type OrderItems = ArrayElement<OrderWithProfilesAndItems['order_items']>;
+type OrderItems = ArrayElement<Order['order_items']>;
 
 export type OrderItemPreview = Optional<Pick<OrderItems, 'product_id' | 'quantity' | 'products'>, 'products'>;
 
