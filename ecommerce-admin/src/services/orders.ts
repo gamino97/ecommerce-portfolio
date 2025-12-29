@@ -1,6 +1,6 @@
 'use server';
 import { fetchApi } from './api';
-import { OrderValidator, type Order } from '@/entities/order';
+import { type Order } from '@/entities/order';
 
 export async function getOrders(): Promise<Order[]> {
   const response = await fetchApi('/orders/');
@@ -47,15 +47,4 @@ export async function getCustomersCount(): Promise<number> {
   if (!response.ok) return 0;
   const data = await response.json();
   return data.count;
-}
-
-export async function createOrder(order: OrderValidator) {
-  const response = await fetchApi('/orders', {
-    method: 'POST',
-    body: JSON.stringify(order),
-  });
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.detail || 'Failed to create order');
-  }
 }

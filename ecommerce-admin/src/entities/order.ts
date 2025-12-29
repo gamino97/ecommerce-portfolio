@@ -16,7 +16,7 @@ export const orderItemSchema = z.object({
   quantity: z.number({ message: 'Quantity is required' }).int().positive({ message: 'Quantity must be at least 1' }),
 });
 
-export type OrderItem = z.infer<typeof orderItemSchema> & {price: number};
+export type OrderItem = z.infer<typeof orderItemSchema> & { price: number };
 
 export const orderSchema = z.object({
   customerId: z.string({ message: 'Customer is required' }),

@@ -74,12 +74,6 @@ export default async function OrdersPage() {
             View and manage customer orders
           </p>
         </div>
-        <Button asChild>
-          <Link href="/dashboard/orders/new">
-            <Plus className="mr-2 h-4 w-4" />
-            Add Order
-          </Link>
-        </Button>
       </div>
       <div className="rounded-md border">
         {orders && orders.length > 0 ? (

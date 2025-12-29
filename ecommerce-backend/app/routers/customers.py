@@ -10,7 +10,6 @@ router = APIRouter()
 
 @router.get(
     "/customers/",
-    tags=["customers"],
     response_model=list[UserRead],
     dependencies=[Depends(current_superuser)],
 )
@@ -20,7 +19,6 @@ async def read_customers(session: SessionDep):
 
 @router.get(
     "/customers/count",
-    tags=["customers"],
     dependencies=[Depends(current_superuser)],
 )
 async def count_customers(session: SessionDep):

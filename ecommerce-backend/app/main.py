@@ -5,7 +5,43 @@ from app.routers import carts, categories, customers, orders, products
 from app.schemas import UserCreate, UserRead, UserUpdate
 from app.users import auth_backend, current_active_user, fastapi_users
 
-app = FastAPI()
+tags_metadata = [
+    {
+        "name": "auth",
+        "description": "Authentication operations (login, logout, register, etc.)",
+    },
+    {
+        "name": "users",
+        "description": "Operations to manage users.",
+    },
+    {
+        "name": "categories",
+        "description": "Manage product categories.",
+    },
+    {
+        "name": "products",
+        "description": "Manage products (create, read, update, delete).",
+    },
+    {
+        "name": "customers",
+        "description": "Manage customer information.",
+    },
+    {
+        "name": "orders",
+        "description": "Manage orders (create, list, process).",
+    },
+    {
+        "name": "carts",
+        "description": "Manage shopping carts and cart items.",
+    },
+]
+
+app = FastAPI(
+    title="Ecommerce Portfolio API",
+    description="API for the Ecommerce Portfolio application.",
+    version="1.0.0",
+    openapi_tags=tags_metadata,
+)
 
 
 app.include_router(
@@ -54,8 +90,3 @@ app.include_router(
     carts.router,
     tags=["carts"],
 )
-
-
-@app.get("/authenticated-route")
-async def authenticated_route(user: User = Depends(current_active_user)):
-    return {"message": f"Hello {user.email}!"}
