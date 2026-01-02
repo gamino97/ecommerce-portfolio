@@ -155,7 +155,7 @@ async def seed() -> None:
 
         for spec in order_items_specs:
             order = orders_by_address.get(spec["shipping_address"])
-            product = spec["product"]
+            product: Product = spec["product"]
             if order is None or product is None:
                 print(
                     f"Skipping order item: order or product not found for shipping address {spec['shipping_address']}"
@@ -177,6 +177,7 @@ async def seed() -> None:
                         order_id=order.id,
                         product_id=product.id,
                         quantity=spec["quantity"],
+                        price=product.price * spec["quantity"],
                     )
                 )
         await session.commit()
