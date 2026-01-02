@@ -59,5 +59,5 @@ Always use this general rules:
 
 # Key Conventions
 1. Prioritize Mobile Web Vitals (Load Time, Jank, and Responsiveness).
-2. The deployment to the web will be done using Railway for Next.js, and supabase.
+2. The deployment to the web will be done using Railway for Next.js.
 3. Use pnpm to install dependencies

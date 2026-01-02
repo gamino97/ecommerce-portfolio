@@ -22,10 +22,9 @@ Apply this rules when editing a React Native File
 
 # Styling & UI
 - Use Tailwind CSS for styling.
-- Use Shadcn UI for components.
+- Use Shadcn UI for components. You can use the MCP.
 - Ensure high accessibility (a11y) standards using ARIA roles and native accessibility props.
 - Extract shared UI into reusable components in components/.
-
 
 # Data Fetching & Forms
 - Use TanStack Query (react-query) for frontend data fetching.
@@ -38,7 +37,7 @@ Apply this rules when editing a React Native File
 - Use React Context for state management.
 
 # Backend & Database
-- Use Supabase for database access.
+- Use ecommerce-backend for database access.
 
 # Internationalization (i18n)
 - Use react-i18next or expo-localization for internationalization and localization.
