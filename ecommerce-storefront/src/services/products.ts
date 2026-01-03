@@ -1,17 +1,5 @@
 import { fetchApi } from './api';
-import { ProductInsert } from '@/entities/product';
-
-export type Product = {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  stock: number;
-  category_id: string;
-  image_url: string;
-  created_at: string;
-  updated_at: string;
-};
+import { Product, ProductInsert } from '@/entities/product';
 
 export async function getProducts(): Promise<Product[]> {
   const response = await fetchApi('/products');

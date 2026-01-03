@@ -4,15 +4,16 @@ export function proxy(request: NextRequest) {
   const token = request.cookies.get('access_token')?.value;
   const isLoginPage = request.nextUrl.pathname.startsWith('/login');
   const isRegisterPage = request.nextUrl.pathname.startsWith('/register');
+  const isStorePage = request.nextUrl.pathname.startsWith('/store');
   const isHomePage = request.nextUrl.pathname === '/';
-  const isPublicPath = isLoginPage || isRegisterPage || isHomePage;
+  const isPublicPath = isLoginPage || isRegisterPage || isHomePage || isStorePage;
 
   if (!token && !isPublicPath) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  if (token && isPublicPath) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+  if (token && (isLoginPage || isRegisterPage)) {
+    return NextResponse.redirect(new URL('/store', request.url));
   }
 
   return NextResponse.next();

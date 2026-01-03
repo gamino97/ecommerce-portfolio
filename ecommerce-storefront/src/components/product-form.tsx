@@ -56,7 +56,6 @@ export function ProductForm({
     [onSubmit],
   );
   const { control, formState } = form;
-  console.log({ formState });
   return (
     <Form {...form}>
       <form className="space-y-6" onSubmit={form.handleSubmit(handleSubmit)}>
@@ -92,7 +91,7 @@ export function ProductForm({
                         min={0}
                         className="pl-7"
                         {...field}
-                        onChange={(e) => field.onChange(e.target.valueAsNumber || '')}
+                        onChange={(e) => field.onChange(e.target.valueAsNumber ?? '')}
                       />
                     </div>
                   </FormControl>
@@ -109,9 +108,10 @@ export function ProductForm({
                   <FormControl>
                     <Input
                       type="number"
+                      step={1}
                       min={0}
                       {...field}
-                      onChange={(e) => field.onChange(e.target.valueAsNumber || '')}
+                      onChange={(e) => field.onChange(e.target.valueAsNumber ?? '')}
                     />
                   </FormControl>
                   <FormMessage />
