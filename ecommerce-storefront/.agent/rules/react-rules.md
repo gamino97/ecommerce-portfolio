@@ -22,7 +22,7 @@ Apply this rules when editing a React Native File
 
 # Styling & UI
 - Use Tailwind CSS for styling.
-- Use Shadcn UI for components. You can use the MCP.
+- Use Shadcn UI for components. You can use the MCP. If you can use a component which is not installed, request installation
 - Ensure high accessibility (a11y) standards using ARIA roles and native accessibility props.
 - Extract shared UI into reusable components in components/.
 

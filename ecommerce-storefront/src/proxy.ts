@@ -4,7 +4,7 @@ export function proxy(request: NextRequest) {
   const token = request.cookies.get('access_token')?.value;
   const isLoginPage = request.nextUrl.pathname.startsWith('/login');
   const isRegisterPage = request.nextUrl.pathname.startsWith('/register');
-  const isHomePage = request.nextUrl.pathname.startsWith('/');
+  const isHomePage = request.nextUrl.pathname === '/';
   const isPublicPath = isLoginPage || isRegisterPage || isHomePage;
 
   if (!token && !isPublicPath) {
