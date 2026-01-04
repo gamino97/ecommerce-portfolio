@@ -1,13 +1,13 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ChevronLeft, ShoppingCart, Package } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import { getProductById } from '@/services/products';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { cn, formatPrice } from '@/lib/utils';
+import { AddToCartButton } from '@/components/AddToCartButton';
 
 interface ProductPageProps {
   params: Promise<{
@@ -97,15 +97,10 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
                 <span className="font-medium">{product.category.name}</span>
               </div>
 
-              <Button
-                size="lg"
-                className="w-full h-12 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+              <AddToCartButton
+                productId={product.id}
                 disabled={is_out_of_stock}
-              >
-                <ShoppingCart className="mr-2 h-5 w-5" />
-                Add to Cart
-              </Button>
-
+              />
             </CardContent>
           </Card>
         </div>

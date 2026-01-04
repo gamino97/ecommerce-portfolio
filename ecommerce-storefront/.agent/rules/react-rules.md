@@ -27,7 +27,7 @@ Apply this rules when editing a React Native File
 - Extract shared UI into reusable components in components/.
 
 # Data Fetching & Forms
-- Use TanStack Query (react-query) for frontend data fetching.
+- Use Server Actions for data fetching.
 - Use React Hook Form for form handling.
 - Use Zod for validation.
 - Create custom data hooks (e.g., useProjects, useUser) to encapsulate data logic.

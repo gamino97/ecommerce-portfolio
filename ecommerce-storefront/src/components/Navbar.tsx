@@ -1,11 +1,17 @@
-'use client';
-
 import Link from 'next/link';
 import { ShoppingBag, ShoppingCart, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { getCartAction } from '@/actions/cart';
 
-export function Navbar() {
+export async function Navbar() {
+  const cart = await getCartAction();
+  console.log(cart);
+  const totalItems = Object.values(cart?.items || {}).reduce(
+    (acc: number, qty: unknown) => acc + (Number(qty) || 0),
+    0
+  );
+
   return (
     <header className="border-b border-border/40 backdrop-blur-sm sticky top-0 z-50 bg-background/80">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -20,12 +26,14 @@ export function Navbar() {
           <Button variant="ghost" size="icon" asChild className="relative">
             <Link href="/cart">
               <ShoppingCart className="w-5 h-5" />
-              <Badge
-                className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center p-0 text-[10px]"
-                variant="default"
-              >
-                0
-              </Badge>
+              {totalItems > 0 && (
+                <Badge
+                  className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center p-0 text-[10px]"
+                  variant="default"
+                >
+                  {totalItems}
+                </Badge>
+              )}
             </Link>
           </Button>
 
