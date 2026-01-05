@@ -3,13 +3,13 @@ trigger: glob
 globs: **/*.jsx,**/*.tsx
 ---
 
-Apply this rules when editing a React Native File
+Apply this rules when editing a React or Next.js File
 
 # React rules
 - Use functional components with hooks.
 - Follow a consistent folder structure (components, screens, navigation, services, hooks, utils).
 - Use custom hooks for reusable logic, inside hooks folder.
-- Implement proper error boundaries and loading states
+- Implement proper error boundaries and loading states from Next.js.
 - Use declarative JSX.
 - Avoid anonymous functions in render and prop handlers.
 - Do not write "import React from 'react'"

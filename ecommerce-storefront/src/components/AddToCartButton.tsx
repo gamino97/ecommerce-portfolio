@@ -2,6 +2,7 @@
 
 import { useTransition } from 'react';
 import { ShoppingCart, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { addToCartAction } from '@/actions/cart';
 
@@ -15,14 +16,19 @@ export function AddToCartButton({ productId, disabled }: AddToCartButtonProps) {
 
   const handleAddToCart = () => {
     startTransition(async () => {
-      await addToCartAction(productId);
+      try {
+        await addToCartAction(productId);
+        toast.success('Added to cart');
+      } catch {
+        toast.error('Failed to add item to cart');
+      }
     });
   };
 
   return (
     <Button
       size="lg"
-      className="w-full h-12 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 active:scale-95"
+      className="w-full h-12 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 active:scale-95 cursor-pointer"
       disabled={disabled || isPending}
       onClick={handleAddToCart}
     >
