@@ -5,7 +5,6 @@ from typing import Annotated
 
 from fastapi_users import schemas
 from pydantic import BaseModel, ConfigDict, Field, computed_field
-from pydantic.types import condecimal
 
 
 class UserRead(schemas.BaseUser[uuid.UUID]):
@@ -54,12 +53,16 @@ class ProductRead(BaseModel):
     category_id: uuid.UUID
 
 
+class ProductReadWithCategory(ProductRead):
+    category: CategoryRead
+
+
 class ProductCreate(BaseModel):
     name: str
     description: str
     image_url: str
     price: ProductPrice
-    stock: int
+    stock: int = Field(ge=0)
     category_id: uuid.UUID
 
 
@@ -68,7 +71,7 @@ class ProductUpdate(BaseModel):
     description: str | None = None
     image_url: str | None = None
     price: ProductPrice | None = None
-    stock: int | None = None
+    stock: int | None = Field(ge=0, default=None)
     category_id: uuid.UUID | None = None
 
 

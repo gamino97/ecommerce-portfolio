@@ -1,9 +1,8 @@
-from fastapi import Depends, FastAPI
+from fastapi import FastAPI
 
-from app.db import User
 from app.routers import carts, categories, customers, orders, products
 from app.schemas import UserCreate, UserRead, UserUpdate
-from app.users import auth_backend, current_active_user, fastapi_users
+from app.users import auth_backend, fastapi_users
 
 tags_metadata = [
     {
