@@ -131,3 +131,12 @@ class CartCreate(BaseModel):
 class CartUpdate(BaseModel):
     user_id: uuid.UUID | None = None
     items: CartItem
+
+
+class CartItemAdd(BaseModel):
+    product_id: uuid.UUID
+    quantity: int = Field(gt=0)
+
+
+class CartItemUpdate(BaseModel):
+    quantity: int = Field(gt=0)

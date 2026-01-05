@@ -63,6 +63,70 @@ class CartService:
         return cart
 
     @staticmethod
+    async def add_item_to_cart(
+        session: AsyncSession,
+        cart_id: int,
+        product_id: str,
+        quantity: int,
+    ):
+        cart = await CartService.get_cart(session, cart_id)
+        cart = cast(Cart, cart)
+
+        product = await session.get(Product, uuid.UUID(product_id))
+        CartService.validate_product_stock(product_id, product, quantity)
+
+        items = cart.items.copy()
+        current_quantity = items.get(product_id, 0)
+        new_quantity = current_quantity + quantity
+
+        # Re-validate total quantity after addition
+        CartService.validate_product_stock(product_id, product, new_quantity)
+
+        items[product_id] = new_quantity
+        cart.items = items
+        await session.commit()
+        return cart
+
+    @staticmethod
+    async def update_item_in_cart(
+        session: AsyncSession,
+        cart_id: int,
+        product_id: str,
+        quantity: int,
+    ):
+        cart = await CartService.get_cart(session, cart_id)
+        cart = cast(Cart, cart)
+        if product_id not in cart.items:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Product {product_id} not in cart",
+            )
+        product = await session.get(Product, uuid.UUID(product_id))
+        CartService.validate_product_stock(product_id, product, quantity)
+
+        items = cart.items.copy()
+        items[product_id] = quantity
+        cart.items = items
+        await session.commit()
+        return cart
+
+    @staticmethod
+    async def remove_item_from_cart(
+        session: AsyncSession,
+        cart_id: int,
+        product_id: str,
+    ):
+        cart = await CartService.get_cart(session, cart_id)
+        cart = cast(Cart, cart)
+        if product_id not in cart.items:
+            return cart
+        items = cart.items.copy()
+        del items[product_id]
+        cart.items = items
+        await session.commit()
+        return cart
+
+    @staticmethod
     def is_valid_cart(cart: Cart | None) -> bool:
         return bool(cart and cart.is_active)
 

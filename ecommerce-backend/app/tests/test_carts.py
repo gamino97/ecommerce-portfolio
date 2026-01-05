@@ -97,3 +97,88 @@ async def test_update_cart_product_invalid_quantity(
         json={"items": {str(product.id): -1}},
     )
     assert response.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_add_item_to_cart_router(
+    client: AsyncClient, cart: Cart, product: Product
+):
+    response = await client.post(
+        f"/carts/{cart.id}/items/",
+        json={"product_id": str(product.id), "quantity": 2},
+    )
+    assert response.status_code == 200
+    assert response.json()["items"][str(product.id)] == 2
+
+    # Add more of the same item
+    response = await client.post(
+        f"/carts/{cart.id}/items/",
+        json={"product_id": str(product.id), "quantity": 1},
+    )
+    assert response.status_code == 200
+    assert response.json()["items"][str(product.id)] == 3
+
+
+@pytest.mark.asyncio
+async def test_add_item_to_cart_router_insufficient_stock(
+    client: AsyncClient, cart: Cart, product: Product
+):
+    response = await client.post(
+        f"/carts/{cart.id}/items/",
+        json={"product_id": str(product.id), "quantity": product.stock + 1},
+    )
+    assert response.status_code == 400
+    assert (
+        response.json()["detail"]
+        == f"Not enough stock for product {product.name}"
+    )
+
+
+@pytest.mark.asyncio
+async def test_update_item_in_cart_router(
+    client: AsyncClient, cart: Cart, product: Product, session: AsyncSession
+):
+    cart.items = {str(product.id): 1}
+    session.add(cart)
+    await session.commit()
+
+    response = await client.put(
+        f"/carts/{cart.id}/items/{product.id}",
+        json={"quantity": 5},
+    )
+    assert response.status_code == 200
+    assert response.json()["items"][str(product.id)] == 5
+
+
+@pytest.mark.asyncio
+async def test_update_item_in_cart_router_not_in_cart(
+    client: AsyncClient, cart: Cart, product: Product
+):
+    response = await client.put(
+        f"/carts/{cart.id}/items/{product.id}",
+        json={"quantity": 5},
+    )
+    assert response.status_code == 404
+    assert response.json()["detail"] == f"Product {product.id} not in cart"
+
+
+@pytest.mark.asyncio
+async def test_remove_item_from_cart_router(
+    client: AsyncClient, cart: Cart, product: Product, session: AsyncSession
+):
+    cart.items = {str(product.id): 1}
+    session.add(cart)
+    await session.commit()
+
+    response = await client.delete(f"/carts/{cart.id}/items/{product.id}")
+    assert response.status_code == 200
+    assert str(product.id) not in response.json()["items"]
+
+
+@pytest.mark.asyncio
+async def test_remove_item_from_cart_router_not_in_cart(
+    client: AsyncClient, cart: Cart, product: Product
+):
+    response = await client.delete(f"/carts/{cart.id}/items/{product.id}")
+    assert response.status_code == 200
+    assert response.json()["items"] == {}
