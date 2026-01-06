@@ -39,8 +39,11 @@ async def test_update_cart_router(
     )
     print(response.json())
     assert response.status_code == 200
-    assert response.json()["items"] == {str(product.id): 1}
-    assert cart.items == {str(product.id): 1}
+    data = response.json()
+    assert len(data["items"]) == 1
+    assert data["items"][0]["product_id"] == str(product.id)
+    assert data["items"][0]["quantity"] == 1
+    assert "summary" in data
 
 
 @pytest.mark.asyncio
@@ -83,9 +86,11 @@ async def test_get_cart(
     response = await client.get(f"/carts/{cart.id}")
     assert response.status_code == 200
     data = response.json()
-    assert data["items"] == {str(product.id): 1}
+    assert len(data["items"]) == 1
+    assert data["items"][0]["product_id"] == str(product.id)
     assert data["user_id"] == cart.user_id
     assert data["id"] == cart.id
+    assert "summary" in data
 
 
 @pytest.mark.asyncio
@@ -108,7 +113,9 @@ async def test_add_item_to_cart_router(
         json={"product_id": str(product.id), "quantity": 2},
     )
     assert response.status_code == 200
-    assert response.json()["items"][str(product.id)] == 2
+    data = response.json()
+    assert data["items"][0]["product_id"] == str(product.id)
+    assert data["items"][0]["quantity"] == 2
 
     # Add more of the same item
     response = await client.post(
@@ -116,7 +123,8 @@ async def test_add_item_to_cart_router(
         json={"product_id": str(product.id), "quantity": 1},
     )
     assert response.status_code == 200
-    assert response.json()["items"][str(product.id)] == 3
+    data = response.json()
+    assert data["items"][0]["quantity"] == 3
 
 
 @pytest.mark.asyncio
@@ -147,7 +155,8 @@ async def test_update_item_in_cart_router(
         json={"quantity": 5},
     )
     assert response.status_code == 200
-    assert response.json()["items"][str(product.id)] == 5
+    data = response.json()
+    assert data["items"][0]["quantity"] == 5
 
 
 @pytest.mark.asyncio
@@ -172,7 +181,9 @@ async def test_remove_item_from_cart_router(
 
     response = await client.delete(f"/carts/{cart.id}/items/{product.id}")
     assert response.status_code == 200
-    assert str(product.id) not in response.json()["items"]
+    data = response.json()
+    product_ids = [item["product_id"] for item in data["items"]]
+    assert str(product.id) not in product_ids
 
 
 @pytest.mark.asyncio
@@ -181,4 +192,4 @@ async def test_remove_item_from_cart_router_not_in_cart(
 ):
     response = await client.delete(f"/carts/{cart.id}/items/{product.id}")
     assert response.status_code == 200
-    assert response.json()["items"] == {}
+    assert response.json()["items"] == []

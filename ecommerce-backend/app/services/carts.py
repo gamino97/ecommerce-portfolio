@@ -1,3 +1,4 @@
+import decimal
 import uuid
 from typing import cast
 
@@ -6,7 +7,12 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
 from app.db import Cart, Product
-from app.schemas import CartUpdate
+from app.schemas import (
+    CartItemEnriched,
+    CartRead,
+    CartSummary,
+    CartUpdate,
+)
 
 
 class CartService:
@@ -21,7 +27,7 @@ class CartService:
         session.add(cart)
         await session.commit()
         await session.refresh(cart)
-        return cart
+        return await CartService._get_cart_read_from_model(session, cart)
 
     @staticmethod
     async def get_cart(session: AsyncSession, cart_id: int):
@@ -30,7 +36,9 @@ class CartService:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Cart not found"
             )
-        return cart
+        return await CartService._get_cart_read_from_model(
+            session, cast(Cart, cart)
+        )
 
     @staticmethod
     async def update_cart(
@@ -46,7 +54,7 @@ class CartService:
         cart = cast(Cart, cart)
         product_ids = list(updated_cart.items.keys())
         if not product_ids:
-            return cart
+            return await CartService._get_cart_read_from_model(session, cart)
         result = await session.execute(
             select(Product).where(Product.id.in_(product_ids))
         )
@@ -60,7 +68,7 @@ class CartService:
             items[product_id] = quantity
         cart.items = items
         await session.commit()
-        return cart
+        return await CartService._get_cart_read_from_model(session, cart)
 
     @staticmethod
     async def add_item_to_cart(
@@ -69,8 +77,12 @@ class CartService:
         product_id: str,
         quantity: int,
     ):
-        cart = await CartService.get_cart(session, cart_id)
-        cart = cast(Cart, cart)
+        cart_obj = await session.get(Cart, cart_id)
+        if not CartService.is_valid_cart(cart_obj):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Cart not found"
+            )
+        cart = cast(Cart, cart_obj)
 
         product = await session.get(Product, uuid.UUID(product_id))
         CartService.validate_product_stock(product_id, product, quantity)
@@ -85,7 +97,7 @@ class CartService:
         items[product_id] = new_quantity
         cart.items = items
         await session.commit()
-        return cart
+        return await CartService._get_cart_read_from_model(session, cart)
 
     @staticmethod
     async def update_item_in_cart(
@@ -94,8 +106,12 @@ class CartService:
         product_id: str,
         quantity: int,
     ):
-        cart = await CartService.get_cart(session, cart_id)
-        cart = cast(Cart, cart)
+        cart_obj = await session.get(Cart, cart_id)
+        if not CartService.is_valid_cart(cart_obj):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Cart not found"
+            )
+        cart = cast(Cart, cart_obj)
         if product_id not in cart.items:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -108,7 +124,7 @@ class CartService:
         items[product_id] = quantity
         cart.items = items
         await session.commit()
-        return cart
+        return await CartService._get_cart_read_from_model(session, cart)
 
     @staticmethod
     async def remove_item_from_cart(
@@ -116,15 +132,19 @@ class CartService:
         cart_id: int,
         product_id: str,
     ):
-        cart = await CartService.get_cart(session, cart_id)
-        cart = cast(Cart, cart)
+        cart_obj = await session.get(Cart, cart_id)
+        if not CartService.is_valid_cart(cart_obj):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Cart not found"
+            )
+        cart = cast(Cart, cart_obj)
         if product_id not in cart.items:
-            return cart
+            return await CartService._get_cart_read_from_model(session, cart)
         items = cart.items.copy()
         del items[product_id]
         cart.items = items
         await session.commit()
-        return cart
+        return await CartService._get_cart_read_from_model(session, cart)
 
     @staticmethod
     def is_valid_cart(cart: Cart | None) -> bool:
@@ -138,6 +158,60 @@ class CartService:
             if quantity > 0:
                 return False
         return True
+
+    @staticmethod
+    async def _get_cart_read_from_model(
+        session: AsyncSession, cart: Cart
+    ) -> CartRead:
+        product_ids = [uuid.UUID(pid) for pid in cart.items.keys()]
+        products_map = {}
+        if product_ids:
+            result = await session.execute(
+                select(Product).where(Product.id.in_(product_ids))
+            )
+            products = result.scalars().all()
+            products_map = {str(p.id): p for p in products}
+
+        enriched_items = []
+        subtotal = decimal.Decimal(0)
+        total_items_count = 0
+
+        for pid_str, quantity in cart.items.items():
+            product = products_map.get(pid_str)
+            if not product:
+                continue
+
+            unit_price = decimal.Decimal(str(product.price))
+            line_total: decimal.Decimal = unit_price * quantity
+            subtotal += line_total
+            total_items_count += quantity
+
+            enriched_items.append(
+                CartItemEnriched(
+                    product_id=uuid.UUID(pid_str),
+                    name=product.name,
+                    description=product.description,
+                    image_url=product.image_url,
+                    quantity=quantity,
+                    price=product.price,
+                    stock=product.stock,
+                    line_total=line_total,
+                )
+            )
+
+        grand_total = subtotal
+        summary = CartSummary(
+            subtotal=subtotal,
+            grand_total=grand_total,
+            total_items_count=total_items_count,
+        )
+        return CartRead(
+            id=cart.id,
+            user_id=cart.user_id,
+            items=enriched_items,
+            summary=summary,
+            updated_at=cart.created_at,
+        )
 
     @staticmethod
     def validate_product_stock(

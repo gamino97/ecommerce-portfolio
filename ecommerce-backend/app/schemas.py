@@ -116,11 +116,29 @@ class OrderCreate(BaseModel):
 type CartItem = dict[uuid.UUID, Annotated[int, Field(ge=0)]]
 
 
+class CartItemEnriched(BaseModel):
+    product_id: uuid.UUID
+    name: str
+    description: str
+    image_url: str
+    quantity: int
+    price: ProductPrice
+    line_total: decimal.Decimal
+    stock: int
+
+
+class CartSummary(BaseModel):
+    subtotal: decimal.Decimal
+    grand_total: decimal.Decimal
+    total_items_count: int
+
+
 class CartRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int
     user_id: uuid.UUID | None
-    items: CartItem
+    items: list[CartItemEnriched]
+    summary: CartSummary
 
 
 class CartCreate(BaseModel):
