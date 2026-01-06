@@ -16,11 +16,11 @@ export function AddToCartButton({ productId, disabled }: AddToCartButtonProps) {
 
   const handleAddToCart = () => {
     startTransition(async () => {
-      try {
-        await addToCartAction(productId);
+      const result = await addToCartAction(productId);
+      if ('message' in result) {
+        toast.error(result.message);
+      } else {
         toast.success('Added to cart');
-      } catch {
-        toast.error('Failed to add item to cart');
       }
     });
   };

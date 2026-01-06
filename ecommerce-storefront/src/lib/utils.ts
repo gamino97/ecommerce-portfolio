@@ -11,7 +11,7 @@ export function getErrorMessage(error: unknown) {
   return String(error);
 }
 
-export function formatPrice(price: string | number): string {
+export function formatPrice(price: string | number | Decimal): string {
   let orderTotal = Decimal(price);
   if (orderTotal.isNaN()) orderTotal = Decimal(0);
   return Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(orderTotal.toNumber());
