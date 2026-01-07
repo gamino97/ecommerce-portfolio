@@ -39,8 +39,8 @@ export async function loginAction(prevState: unknown, formData: FormData) {
     }
     return { error: 'An unexpected error occurred' };
   }
+  return { success: true };
 
-  redirect('/dashboard');
 }
 
 export async function logoutAction() {

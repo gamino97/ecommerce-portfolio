@@ -8,16 +8,19 @@ import { loginAction } from '@/actions/auth';
 import { LoginFormValues, loginSchema } from './utils';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { useActionState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 // Define the state type based on the action return type
-type LoginState = { error?: string } | null;
+type LoginState = { error?: string, success?: boolean } | null;
 
 export default function LoginForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get('redirect');
   const [state, formAction, isPending] = useActionState<LoginState, FormData>(
     loginAction,
     null
   );
-
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -33,8 +36,10 @@ export default function LoginForm() {
   useEffect(() => {
     if (state?.error) {
       setError('root', { message: state.error });
+    } else if (state?.success) {
+      router.push(redirect || '/dashboard');
     }
-  }, [state, setError]);
+  }, [state, setError, redirect, router]);
 
   return (
     <Form {...form}>
