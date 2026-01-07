@@ -1,6 +1,5 @@
 import { z } from 'zod';
-import { ArrayElement, Optional } from '.';
-import { Product } from '@/services/products';
+import { Product } from '@/entities/product';
 
 export const orderStatuses = [
   'pending',
@@ -16,7 +15,9 @@ export const orderItemSchema = z.object({
   quantity: z.number({ message: 'Quantity is required' }).int().positive({ message: 'Quantity must be at least 1' }),
 });
 
-export type OrderItem = z.infer<typeof orderItemSchema> & { price: number };
+export type OrderItem = z.infer<typeof orderItemSchema> & {
+  price: number, subtotal: string, product: Product,
+};
 
 export const orderSchema = z.object({
   customerId: z.string({ message: 'Customer is required' }),
@@ -27,17 +28,6 @@ export const orderSchema = z.object({
     .array(orderItemSchema)
     .min(1, 'At least one item is required'),
 });
-
-export type OrderValidator = z.infer<typeof orderSchema>;
-
-export const defaultOrderValues: Partial<OrderValidator> = {
-  status: 'pending',
-  items: [],
-};
-
-type OrderItems = ArrayElement<Order['order_items']>;
-
-export type OrderItemPreview = Optional<Pick<OrderItems, 'product_id' | 'quantity' | 'products'>, 'products'>;
 
 export type OrderUser = {
   id: string;
@@ -52,6 +42,15 @@ export type Order = {
   shipping_address: string;
   created_at: string;
   total_price: string;
-  user?: OrderUser;
-  order_items: (OrderItem & { products?: Product, product?: Product })[];
+  user: OrderUser;
+  order_items: OrderItem[];
 };
+
+export const checkoutSchema = z.object({
+  shipping_address: z
+    .string()
+    .min(5, 'Address is too short')
+    .max(200, 'Address is too long'),
+});
+
+export type CheckoutValues = z.infer<typeof checkoutSchema>;

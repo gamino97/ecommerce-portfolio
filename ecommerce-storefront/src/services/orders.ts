@@ -1,5 +1,6 @@
 'use server';
-import { fetchApi } from './api';
+
+import { fetchApi, handleRequest } from './api';
 import { type Order } from '@/entities/order';
 
 export async function getOrders(): Promise<Order[]> {
@@ -7,8 +8,6 @@ export async function getOrders(): Promise<Order[]> {
   if (!response.ok) throw new Error('Failed to fetch orders');
   return response.json();
 }
-
-export type OrderWithProfilesAndItems = Order;
 
 export async function getOrder(id: string): Promise<Order | null> {
   const response = await fetchApi(`/orders/${id}`);
@@ -47,4 +46,15 @@ export async function getCustomersCount(): Promise<number> {
   if (!response.ok) return 0;
   const data = await response.json();
   return data.count;
+}
+
+export async function createOrder(
+  cartId: number,
+  shippingAddress: string
+) {
+  const response = await fetchApi(`/carts/${cartId}/orders/`, {
+    method: 'POST',
+    body: JSON.stringify({ shipping_address: shippingAddress }),
+  });
+  return await handleRequest<Order>(response);
 }

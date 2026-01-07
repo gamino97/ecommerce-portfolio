@@ -9,8 +9,7 @@ import {
   removeItemFromCart,
   updateItemInCart,
 } from '@/services/carts';
-
-const CART_ID_COOKIE = 'nexstore_cart_id';
+import { CART_ID_COOKIE } from '@/entities/cart';
 
 export async function getCartAction() {
   const cookieStore = await cookies();

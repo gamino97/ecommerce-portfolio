@@ -5,17 +5,16 @@ export function proxy(request: NextRequest) {
   const isLoginPage = request.nextUrl.pathname.startsWith('/login');
   const isRegisterPage = request.nextUrl.pathname.startsWith('/register');
   const isStorePage = request.nextUrl.pathname.startsWith('/store');
+  const isOrdersPage = request.nextUrl.pathname.startsWith('/store/orders');
   const isHomePage = request.nextUrl.pathname === '/';
-  const isPublicPath = isLoginPage || isRegisterPage || isHomePage || isStorePage;
-
+  const isPublicPath = isLoginPage || isRegisterPage || isHomePage ||
+    isStorePage || isOrdersPage;
   if (!token && !isPublicPath) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
-
   if (token && (isLoginPage || isRegisterPage)) {
     return NextResponse.redirect(new URL('/store', request.url));
   }
-
   return NextResponse.next();
 }
 

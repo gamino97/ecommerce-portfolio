@@ -56,7 +56,6 @@ export async function addItemToCart(
   });
   if (!res.ok) {
     const error = await res.json();
-    console.log(error);
     if (res.status === 400 || res.status === 404) {
       return { message: error.detail };
     }
