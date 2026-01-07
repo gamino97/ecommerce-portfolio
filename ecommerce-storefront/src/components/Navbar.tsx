@@ -1,9 +1,10 @@
 import Link from 'next/link';
-import { ShoppingBag, ShoppingCart, User as UserIcon } from 'lucide-react';
+import { ShoppingBag, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { getCartAction } from '@/actions/cart';
 import { User } from '@/entities/user';
+import { UserMenu } from '@/components/UserMenu';
 
 export async function Navbar({ user }: { user?: User | null }) {
   const cart = await getCartAction();
@@ -31,11 +32,7 @@ export async function Navbar({ user }: { user?: User | null }) {
               )}
             </Link>
           </Button>
-          <Button variant="ghost" size="icon" asChild>
-            <Link href={user ? '/store/orders' : '/login'}>
-              <UserIcon className="w-5 h-5" />
-            </Link>
-          </Button>
+          <UserMenu user={user} />
         </div>
       </div>
     </header>
