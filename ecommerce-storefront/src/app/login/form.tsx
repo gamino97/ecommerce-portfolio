@@ -37,7 +37,7 @@ export default function LoginForm() {
     if (state?.error) {
       setError('root', { message: state.error });
     } else if (state?.success) {
-      router.push(redirect || '/dashboard');
+      router.push(redirect || '/store');
     }
   }, [state, setError, redirect, router]);
 

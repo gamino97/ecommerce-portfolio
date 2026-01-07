@@ -83,6 +83,7 @@ export default async function OrderPage(
                         alt={item.product?.name || ''}
                         width={44}
                         height={44}
+                        unoptimized
                       />
                     </TableCell>
                     <TableCell>{item.product?.name}</TableCell>

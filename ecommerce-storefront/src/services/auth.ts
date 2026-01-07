@@ -1,4 +1,5 @@
-import { LoginData, RegisterData } from '@/entities/user';
+import { LoginData, RegisterData, User } from '@/entities/user';
+import { fetchApi, handleRequest } from './api';
 
 const API_URL = process.env.API_URL;
 
@@ -39,4 +40,9 @@ export async function register(data: RegisterData) {
   }
 
   return response.json();
+}
+
+export async function get_me() {
+  const response = await fetchApi('/users/me');
+  return await handleRequest<User>(response);
 }

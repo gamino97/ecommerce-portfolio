@@ -30,9 +30,9 @@ export default async function OrderDetailPage({ params }: Props) {
     <div className="max-w-3xl mx-auto py-10">
       <div className="mb-6">
         <Button variant="ghost" asChild className="pl-0 text-muted-foreground hover:text-foreground">
-          <Link href="/store" className="flex items-center gap-1">
+          <Link href="/store/orders" className="flex items-center gap-1">
             <ChevronLeft className="h-4 w-4" />
-            Back to Shop
+            My Orders
           </Link>
         </Button>
       </div>

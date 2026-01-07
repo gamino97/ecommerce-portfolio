@@ -1,7 +1,18 @@
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/app-sidebar';
-
-export default function Layout({ children }: { children: React.ReactNode }) {
+import { get_user_action } from '@/actions/auth';
+import { notFound, redirect } from 'next/navigation';
+interface Props {
+  children: React.ReactNode;
+}
+export default async function Layout({ children }: Props) {
+  const user = await get_user_action();
+  if (!user) {
+    redirect('/login');
+  }
+  if (!user.is_superuser) {
+    notFound();
+  }
   return (
     <SidebarProvider>
       <AppSidebar />

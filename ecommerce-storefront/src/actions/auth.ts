@@ -2,7 +2,7 @@
 
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { login } from '@/services/auth';
+import { get_me, login } from '@/services/auth';
 import { z } from 'zod';
 
 const loginSchema = z.object({
@@ -47,4 +47,12 @@ export async function logoutAction() {
   const cookieStore = await cookies();
   cookieStore.delete('access_token');
   redirect('/login');
+}
+
+export async function get_user_action() {
+  const response = await get_me();
+  if (!response.success) {
+    return null;
+  }
+  return response.data;
 }

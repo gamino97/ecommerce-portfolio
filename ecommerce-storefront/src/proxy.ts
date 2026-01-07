@@ -8,8 +8,8 @@ export function proxy(request: NextRequest) {
   const isOrdersPage = request.nextUrl.pathname.startsWith('/store/orders');
   const isHomePage = request.nextUrl.pathname === '/';
   const isPublicPath = isLoginPage || isRegisterPage || isHomePage ||
-    isStorePage || isOrdersPage;
-  if (!token && !isPublicPath) {
+    isStorePage;
+  if (!token && (!isPublicPath || isOrdersPage)) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
   if (token && (isLoginPage || isRegisterPage)) {

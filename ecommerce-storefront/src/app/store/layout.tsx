@@ -1,13 +1,15 @@
 import { Navbar } from '@/components/Navbar';
+import { get_user_action } from '@/actions/auth';
 
-export default function StoreLayout({
+export default async function StoreLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const user = await get_user_action();
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Navbar />
+      <Navbar user={user} />
       <main className="flex-1 container mx-auto px-4 py-8">
         {children}
       </main>
