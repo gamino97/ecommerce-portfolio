@@ -83,6 +83,11 @@ class OrderItemRead(BaseModel):
     product: ProductRead
     price: ProductPrice
 
+    @computed_field
+    @property
+    def subtotal(self) -> decimal.Decimal:
+        return self.price * self.quantity
+
 
 class OrderRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -93,9 +98,10 @@ class OrderRead(BaseModel):
     order_items: list[OrderItemRead]
 
     @computed_field
+    @property
     def total_price(self) -> decimal.Decimal:
         return sum(
-            (item.price * item.quantity for item in self.order_items),
+            (item.subtotal for item in self.order_items),
             start=decimal.Decimal(0),
         )
 
