@@ -4,6 +4,7 @@ export type ActionResponse<T> = {
   error?: string;
   unauthorized?: boolean;
   validationErrors?: Record<string, string>; // For FastAPI validation errors
+  status: number;
 };
 
 export type BackendValidationError = {

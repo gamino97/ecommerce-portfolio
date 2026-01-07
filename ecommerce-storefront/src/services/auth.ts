@@ -1,4 +1,4 @@
-import { LoginData, RegisterData, User } from '@/entities/user';
+import { LoginData, LoginResponse, RegisterData, User } from '@/entities/user';
 import { fetchApi, handleRequest } from './api';
 
 const API_URL = process.env.API_URL;
@@ -15,14 +15,7 @@ export async function login(data: LoginData) {
     },
     body: params,
   });
-
-  if (!response.ok) {
-    const error = await response.json();
-    console.error(error);
-    throw new Error(error.detail || 'Login failed');
-  }
-
-  return response.json();
+  return await handleRequest<LoginResponse>(response);
 }
 
 export async function register(data: RegisterData) {

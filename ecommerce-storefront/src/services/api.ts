@@ -30,10 +30,10 @@ export async function handleRequest<T>(
   const data = await response.json();
 
   if (response.ok) {
-    return { success: true, data };
+    return { success: true, data, status: response.status };
   }
   if (response.status === 403) {
-    return { success: false, unauthorized: true };
+    return { success: false, unauthorized: true, status: response.status };
   }
 
   if (response.status === 422) {
@@ -43,11 +43,12 @@ export async function handleRequest<T>(
       const field = err.loc[err.loc.length - 1];
       validationErrors[field] = err.msg;
     });
-    return { success: false, validationErrors };
+    return { success: false, validationErrors, status: response.status };
   }
 
   return {
     success: false,
-    error: data.detail || 'Something went wrong'
+    error: data.detail || 'Something went wrong',
+    status: response.status
   };
 }

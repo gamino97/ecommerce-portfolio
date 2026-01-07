@@ -20,25 +20,24 @@ export async function loginAction(prevState: unknown, formData: FormData) {
     return { error: 'Invalid fields' };
   }
 
-  try {
-    const { access_token } = await login({ email, password });
-
-    // Store token in HttpOnly cookie
-    const cookieStore = await cookies();
-    cookieStore.set('access_token', access_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 3600, // 1 hour
-    });
-
-  } catch (error) {
-    if (error instanceof Error) {
-      return { error: error.message };
+  const response = await login({ email, password });
+  if (!response.success || !response.data) {
+    if (response.error === 'LOGIN_BAD_CREDENTIALS') {
+      return { error: 'Invalid email or password' };
     }
-    return { error: 'An unexpected error occurred' };
+    return { error: 'Something went wrong' };
   }
+
+  // Store token in HttpOnly cookie
+  const cookieStore = await cookies();
+  cookieStore.set('access_token', response.data.access_token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 3600, // 1 hour
+  });
+
   return { success: true };
 
 }
@@ -46,7 +45,6 @@ export async function loginAction(prevState: unknown, formData: FormData) {
 export async function logoutAction() {
   const cookieStore = await cookies();
   cookieStore.delete('access_token');
-  redirect('/login');
 }
 
 export async function get_user_action() {
