@@ -6,12 +6,12 @@ A modern, scalable headless e-commerce solution built with a **Next.js** admin d
 
 The project is structured as a monorepo containing:
 
-- **`ecommerce-admin`**: A comprehensive Admin Dashboard for managing products, orders, and customers. Built with Next.js 16 and Tailwind CSS 4.
+- **`ecommerce-storefront`**: A unified application containing both the customer-facing storefront and the admin dashboard. Built with Next.js 16 and Tailwind CSS 4.
 - **`ecommerce-backend`**: A robust REST API providing business logic, data persistence, and authentication. Built with Python and FastAPI.
 
 ## 🚀 Tech Stack
 
-### Frontend (Admin Dashboard)
+### Frontend
 - **Framework**: Next.js 16 (App Router)
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS 4
@@ -43,32 +43,38 @@ docker compose -f docker-compose.dev.yaml up -d
 This will start:
 - Postgres Database
 - Backend API (usually on port 8000)
-- Admin Dashboard (usually on port 3000)
+- Storefront & Admin (usually on port 3000)
 
 ### Local Development
 
 #### Backend setup
+
 1. Navigate to the backend directory:
    ```bash
    cd ecommerce-backend
    ```
-2. Install dependencies:
+2. Create strict configuration:
+   ```bash
+   cp .env.example .env
+   ```
+3. Install dependencies:
    ```bash
    uv sync
    ```
-3. Run migrations:
+4. Run migrations:
    ```bash
    uv run alembic upgrade head
    ```
-4. Start the server:
+5. Start the server:
    ```bash
    uv run fastapi dev app/main.py
    ```
 
-#### Admin Dashboard setup
-1. Navigate to the admin directory:
+
+#### Storefront setup
+1. Navigate to the storefront directory:
    ```bash
-   cd ecommerce-admin
+   cd ecommerce-storefront
    ```
 2. Install dependencies:
    ```bash
@@ -84,7 +90,7 @@ This will start:
 ```
 .
 ├── docker-compose.dev.yaml   # Container orchestration
-├── ecommerce-admin/          # Next.js Application
+├── ecommerce-storefront/     # Next.js Shop & Admin
 │   ├── src/app/              # App Router Pages
 │   └── ...
 └── ecommerce-backend/        # FastAPI Application

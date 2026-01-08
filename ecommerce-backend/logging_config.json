@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "disable_existing_loggers": false,
+  "formatters": {
+    "simple": {
+      "format": "%(levelname)s: %(message)s"
+    }
+  },
+  "handlers": {
+    "stdout": {
+      "class": "logging.StreamHandler",
+      "formatter": "simple",
+      "stream": "ext://sys.stdout"
+    }
+  },
+  "loggers": {
+    "app": {
+      "handlers": [
+        "stdout"
+      ],
+      "level": "DEBUG",
+      "propagate": false
+    }
+  }
+}

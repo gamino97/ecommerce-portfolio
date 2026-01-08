@@ -2,24 +2,34 @@ import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
+from sqlalchemy.orm import joinedload
 
 from app.db import Category, Product, SessionDep
-from app.schemas import ProductCreate, ProductRead, ProductUpdate
+from app.schemas import (
+    ProductCreate,
+    ProductRead,
+    ProductUpdate,
+    ProductReadWithCategory,
+)
 from app.services.products import ProductsService
 from app.users import current_superuser
 
 router = APIRouter()
 
 
-@router.get("/products/", response_model=list[ProductRead])
+@router.get("/products/", response_model=list[ProductReadWithCategory])
 async def read_products(session: SessionDep):
-    result = await session.execute(select(Product))
+    result = await session.execute(
+        select(Product).options(joinedload(Product.category))
+    )
     return result.scalars().all()
 
 
-@router.get("/products/{product_id}", response_model=ProductRead)
+@router.get("/products/{product_id}", response_model=ProductReadWithCategory)
 async def read_product(product_id: uuid.UUID, session: SessionDep):
-    product = await session.get(Product, product_id)
+    product = await session.get(
+        Product, product_id, options=[joinedload(Product.category)]
+    )
     if not product:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Product not found"
@@ -59,7 +69,9 @@ async def create_product(product: ProductCreate, session: SessionDep):
 async def update_product(
     product_id: uuid.UUID, product_update: ProductUpdate, session: SessionDep
 ):
-    db_product = await session.get(Product, product_id)
+    db_product = await session.get(
+        Product, product_id, options=[joinedload(Product.category)]
+    )
     if not db_product:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Product not found"

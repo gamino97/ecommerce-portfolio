@@ -1,5 +1,5 @@
 import decimal
-from os import stat
+import logging
 from typing import Sequence, cast
 
 from fastapi import HTTPException, status
@@ -11,6 +11,8 @@ from app.db import Cart, Order, OrderItem, Product, User
 from app.schemas import OrderCreate
 from app.services.carts import CartService
 
+logger = logging.getLogger("app")
+
 
 class OrderService:
 
@@ -19,6 +21,20 @@ class OrderService:
         query = select(Order).options(
             selectinload(Order.user),
             selectinload(Order.order_items).selectinload(OrderItem.product),
+        )
+        result = await session.execute(query)
+        return result.scalars().all()
+
+    @staticmethod
+    async def get_user_orders(
+        session: AsyncSession, user: User
+    ) -> Sequence[Order]:
+        query = (
+            select(Order)
+            .options(
+                selectinload(Order.order_items).selectinload(OrderItem.product)
+            )
+            .where(Order.user_id == user.id)
         )
         result = await session.execute(query)
         return result.scalars().all()
@@ -52,6 +68,7 @@ class OrderService:
         cart_id: int,
         user: User,
     ):
+        logger.info("Creating order for user %s and cart %s", user.id, cart_id)
         result = await session.execute(select(Cart).where(Cart.id == cart_id))
         cart = result.scalar_one_or_none()
         if not CartService.is_valid_cart(cart):
@@ -67,7 +84,7 @@ class OrderService:
             )
         product_ids = list(cart.items.keys())
         result = await session.execute(
-            select(Product).where(Product.id.in_(product_ids))
+            select(Product).where(Product.id.in_(product_ids)).with_for_update()
         )
         products = result.scalars().all()
         products_map = {str(p.id): p for p in products}
@@ -102,6 +119,7 @@ class OrderService:
         )
         result = await session.execute(query)
         created_order = result.scalar_one()
+        logger.info(f"Order {created_order.id} created successfully")
         return created_order
 
     @staticmethod

@@ -1,9 +1,13 @@
-from fastapi import Depends, FastAPI
+import json
+import logging
+import logging.config
+from pathlib import Path
 
-from app.db import User
+from fastapi import FastAPI
+
 from app.routers import carts, categories, customers, orders, products
 from app.schemas import UserCreate, UserRead, UserUpdate
-from app.users import auth_backend, current_active_user, fastapi_users
+from app.users import auth_backend, fastapi_users
 
 tags_metadata = [
     {
@@ -42,6 +46,14 @@ app = FastAPI(
     version="1.0.0",
     openapi_tags=tags_metadata,
 )
+
+
+config_file = Path("logging_config.json")
+with open(config_file) as f_in:
+    config = json.load(f_in)
+logging.config.dictConfig(config)
+logger = logging.getLogger("app")
+logger.info("Application startup complete.")
 
 
 app.include_router(

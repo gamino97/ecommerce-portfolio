@@ -5,7 +5,6 @@ from typing import Annotated
 
 from fastapi_users import schemas
 from pydantic import BaseModel, ConfigDict, Field, computed_field
-from pydantic.types import condecimal
 
 
 class UserRead(schemas.BaseUser[uuid.UUID]):
@@ -54,12 +53,16 @@ class ProductRead(BaseModel):
     category_id: uuid.UUID
 
 
+class ProductReadWithCategory(ProductRead):
+    category: CategoryRead
+
+
 class ProductCreate(BaseModel):
     name: str
     description: str
     image_url: str
     price: ProductPrice
-    stock: int
+    stock: int = Field(ge=0)
     category_id: uuid.UUID
 
 
@@ -68,7 +71,7 @@ class ProductUpdate(BaseModel):
     description: str | None = None
     image_url: str | None = None
     price: ProductPrice | None = None
-    stock: int | None = None
+    stock: int | None = Field(ge=0, default=None)
     category_id: uuid.UUID | None = None
 
 
@@ -80,6 +83,11 @@ class OrderItemRead(BaseModel):
     product: ProductRead
     price: ProductPrice
 
+    @computed_field
+    @property
+    def subtotal(self) -> decimal.Decimal:
+        return self.price * self.quantity
+
 
 class OrderRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -90,9 +98,10 @@ class OrderRead(BaseModel):
     order_items: list[OrderItemRead]
 
     @computed_field
+    @property
     def total_price(self) -> decimal.Decimal:
         return sum(
-            (item.price * item.quantity for item in self.order_items),
+            (item.subtotal for item in self.order_items),
             start=decimal.Decimal(0),
         )
 
@@ -113,11 +122,29 @@ class OrderCreate(BaseModel):
 type CartItem = dict[uuid.UUID, Annotated[int, Field(ge=0)]]
 
 
+class CartItemEnriched(BaseModel):
+    product_id: uuid.UUID
+    name: str
+    description: str
+    image_url: str
+    quantity: int
+    price: ProductPrice
+    line_total: decimal.Decimal
+    stock: int
+
+
+class CartSummary(BaseModel):
+    subtotal: decimal.Decimal
+    grand_total: decimal.Decimal
+    total_items_count: int
+
+
 class CartRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int
     user_id: uuid.UUID | None
-    items: CartItem
+    items: list[CartItemEnriched]
+    summary: CartSummary
 
 
 class CartCreate(BaseModel):
@@ -128,3 +155,12 @@ class CartCreate(BaseModel):
 class CartUpdate(BaseModel):
     user_id: uuid.UUID | None = None
     items: CartItem
+
+
+class CartItemAdd(BaseModel):
+    product_id: uuid.UUID
+    quantity: int = Field(gt=0)
+
+
+class CartItemUpdate(BaseModel):
+    quantity: int = Field(gt=0)

@@ -1,10 +1,8 @@
 import decimal
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
-from sqlalchemy.orm import selectinload
+from fastapi import APIRouter, Depends, status
 
-from app.db import Order, SessionDep, User
+from app.db import SessionDep, User
 from app.schemas import OrderCreate, OrderRead, OrderReadWithUser
 from app.services.orders import OrderService
 from app.users import current_active_user, current_superuser
@@ -17,13 +15,7 @@ async def get_user_orders(
     session: SessionDep,
     user: User = Depends(current_active_user),
 ):
-    query = (
-        select(Order)
-        .options(selectinload(Order.order_items))
-        .where(Order.user_id == user.id)
-    )
-    result = await session.execute(query)
-    return result.scalars().all()
+    return await OrderService.get_user_orders(session, user)
 
 
 @router.get(
