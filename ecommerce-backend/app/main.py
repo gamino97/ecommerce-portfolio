@@ -1,3 +1,8 @@
+import json
+import logging
+import logging.config
+from pathlib import Path
+
 from fastapi import FastAPI
 
 from app.routers import carts, categories, customers, orders, products
@@ -41,6 +46,14 @@ app = FastAPI(
     version="1.0.0",
     openapi_tags=tags_metadata,
 )
+
+
+config_file = Path("logging_config.json")
+with open(config_file) as f_in:
+    config = json.load(f_in)
+logging.config.dictConfig(config)
+logger = logging.getLogger("app")
+logger.info("Application startup complete.")
 
 
 app.include_router(

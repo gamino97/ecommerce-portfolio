@@ -1,3 +1,4 @@
+import _pytest.logging
 import decimal
 import uuid
 from typing import cast
@@ -13,6 +14,9 @@ from app.schemas import (
     CartSummary,
     CartUpdate,
 )
+import logging
+
+logger = logging.getLogger("app")
 
 
 class CartService:
@@ -36,9 +40,8 @@ class CartService:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Cart not found"
             )
-        return await CartService._get_cart_read_from_model(
-            session, cast(Cart, cart)
-        )
+        cart = cast(Cart, cart)
+        return await CartService._get_cart_read_from_model(session, cart)
 
     @staticmethod
     async def update_cart(
@@ -148,7 +151,10 @@ class CartService:
 
     @staticmethod
     def is_valid_cart(cart: Cart | None) -> bool:
-        return bool(cart and cart.is_active)
+        valid_cart = bool(cart and cart.is_active)
+        if not valid_cart:
+            logger.info("Cart not valid: %s", cart)
+        return valid_cart
 
     @staticmethod
     def is_cart_empty(cart: Cart):
@@ -218,11 +224,13 @@ class CartService:
         product_id: str, product: Product | None, quantity: int
     ) -> None:
         if not product:
+            logger.info("Product %s not found in cart", product_id)
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Product {product_id} not found in cart",
             )
         if quantity > product.stock:
+            logger.info("Not enough stock for product %s", product.id)
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Not enough stock for product {product.name}",
