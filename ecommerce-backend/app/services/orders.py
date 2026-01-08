@@ -26,6 +26,20 @@ class OrderService:
         return result.scalars().all()
 
     @staticmethod
+    async def get_user_orders(
+        session: AsyncSession, user: User
+    ) -> Sequence[Order]:
+        query = (
+            select(Order)
+            .options(
+                selectinload(Order.order_items).selectinload(OrderItem.product)
+            )
+            .where(Order.user_id == user.id)
+        )
+        result = await session.execute(query)
+        return result.scalars().all()
+
+    @staticmethod
     async def get_order(
         session: AsyncSession, order_id: int, user: User
     ) -> Order:
