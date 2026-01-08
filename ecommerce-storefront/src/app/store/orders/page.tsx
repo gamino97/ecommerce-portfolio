@@ -1,4 +1,3 @@
-import { Order } from '@/entities/order';
 import { ShoppingBag } from 'lucide-react';
 import { getUserOrders } from '@/services/orders';
 import {
@@ -14,6 +13,11 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { formatPrice, getStatusColor } from '@/lib/utils';
+
+export const metadata = {
+  title: 'My Orders',
+  description: 'Manage and view your order history.',
+};
 
 function EmptyOrders() {
   return (

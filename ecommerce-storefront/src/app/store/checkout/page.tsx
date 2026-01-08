@@ -2,10 +2,13 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { getCartAction } from '@/actions/cart';
 import { Separator } from '@/components/ui/separator';
-
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-
 import { CheckoutForm } from '@/app/store/checkout/CheckoutForm';
+
+export const metadata = {
+  title: 'Checkout',
+  description: 'Checkout your order.',
+};
 
 export default async function CheckoutPage() {
   const cookieStore = await cookies();

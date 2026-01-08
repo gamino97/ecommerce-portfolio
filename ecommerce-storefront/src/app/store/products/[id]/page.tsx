@@ -8,14 +8,24 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { cn, formatPrice } from '@/lib/utils';
 import { AddToCartButton } from '@/components/AddToCartButton';
-
-interface ProductPageProps {
-  params: Promise<{
-    id: string;
-  }>;
+import { Metadata } from 'next';
+interface Props {
+  params: Promise<{ id: string }>;
 }
 
-export default async function ProductDetailPage({ params }: ProductPageProps) {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  const product = await getProductById(id);
+  if (!product) {
+    return { title: 'Product not found' };
+  }
+  return {
+    title: product.name,
+    description: product.description,
+  };
+}
+
+export default async function ProductDetailPage({ params }: Props) {
   const { id } = await params;
   const product = await getProductById(id);
 

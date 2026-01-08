@@ -8,9 +8,21 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { formatPrice, getStatusColor } from '@/lib/utils';
 import Image from 'next/image';
-
+import { Metadata } from 'next';
 interface Props {
   params: Promise<{ id: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  const order = await getOrder(id);
+  if (!order) {
+    return { title: 'Order not found' };
+  }
+  return {
+    title: `Order #${order.id}`,
+    description: `Order #${order.id}`,
+  };
 }
 
 export default async function OrderDetailPage({ params }: Props) {

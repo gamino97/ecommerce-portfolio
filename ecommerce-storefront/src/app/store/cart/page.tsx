@@ -3,6 +3,11 @@ import { getCartAction } from '@/actions/cart';
 import { CartItem } from '@/components/CartItem';
 import { CartSummary } from '@/components/CartSummary';
 
+export const metadata = {
+  title: 'Shopping Cart',
+  description: 'View and manage your shopping cart.',
+};
+
 function EmptyCart() {
   return (
     <div className="px-4 py-16 text-center">
