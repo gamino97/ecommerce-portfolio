@@ -26,13 +26,7 @@ export async function register(data: RegisterData) {
     },
     body: JSON.stringify(data),
   });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.detail || 'Registration failed');
-  }
-
-  return response.json();
+  return await handleRequest<User>(response);
 }
 
 export async function get_me() {
