@@ -3,10 +3,14 @@
 import { fetchApi, handleRequest } from './api';
 import { type Order } from '@/entities/order';
 
-export async function getOrders(): Promise<Order[]> {
+export async function getOrders() {
   const response = await fetchApi('/orders/');
-  if (!response.ok) throw new Error('Failed to fetch orders');
-  return response.json();
+  return await handleRequest<Order[]>(response);
+}
+
+export async function getUserOrders() {
+  const response = await fetchApi('/orders/user');
+  return await handleRequest<Order[]>(response);
 }
 
 export async function getOrder(id: string): Promise<Order | null> {

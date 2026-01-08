@@ -11,13 +11,14 @@ import {
 import { getOrders } from '@/services/orders';
 import { getOrderTotalText } from '@/lib/orders';
 import { StatusBadge } from '@/components/status-badge';
+import { Order } from '@/entities/order';
 
 export const metadata = {
   title: 'Orders',
   description: 'View and manage orders',
 };
 
-function DataTable({ data }: { data: Awaited<ReturnType<typeof getOrders>> }) {
+function DataTable({ data }: { data: Order[] }) {
   return (
     <Table>
       <TableHeader>
@@ -63,7 +64,7 @@ function DataTable({ data }: { data: Awaited<ReturnType<typeof getOrders>> }) {
 }
 
 export default async function OrdersPage() {
-  const orders = await getOrders();
+  const { success, data: orders } = await getOrders();
   return (
     <div className="w-full mx-auto py-10 px-5">
       <div className="flex items-center justify-between mb-6">
@@ -75,7 +76,7 @@ export default async function OrdersPage() {
         </div>
       </div>
       <div className="rounded-md border">
-        {orders && orders.length > 0 ? (
+        {success && orders && orders.length > 0 ? (
           <DataTable data={orders} />
         ) : (
           <div className="p-8 text-center text-muted-foreground">

@@ -6,7 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import { ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { formatPrice } from '@/lib/utils';
+import { formatPrice, getStatusColor } from '@/lib/utils';
 import Image from 'next/image';
 
 interface Props {
@@ -19,12 +19,6 @@ export default async function OrderDetailPage({ params }: Props) {
   if (!order) {
     notFound();
   }
-  const statusColors: Record<string, string> = {
-    pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100',
-    shipped: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100',
-    delivered: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100',
-    canceled: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100',
-  };
 
   return (
     <div className="max-w-3xl mx-auto py-10">
@@ -44,7 +38,7 @@ export default async function OrderDetailPage({ params }: Props) {
             Placed on {new Date(order.created_at).toLocaleDateString()}
           </p>
         </div>
-        <Badge className={statusColors[order.status] || ''}>
+        <Badge className={getStatusColor(order.status)}>
           {order.status.toUpperCase()}
         </Badge>
       </div>
