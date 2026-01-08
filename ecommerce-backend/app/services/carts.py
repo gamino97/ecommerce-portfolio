@@ -1,4 +1,3 @@
-import _pytest.logging
 import decimal
 import uuid
 from typing import cast
