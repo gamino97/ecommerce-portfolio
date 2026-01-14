@@ -9,32 +9,40 @@ on:
 jobs:
   backend-check:
     runs-on: ubuntu-latest
+    # Docker Hub image that `container-job` executes in
+    container: ghcr.io/astral-sh/uv:python3.13-alpine
 
     defaults:
       run:
         working-directory: ./ecommerce-backend
 
+    # Service containers to run with `container-job`
+    services:
+      # Label used to access the service container
+      postgres:
+        # Docker Hub image
+        image: postgres
+        # Provide the password for postgres
+        env:
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.13'
-
-    - name: astral-sh/setup-uv
-      uses: astral-sh/setup-uv@v7.2.0
-      with:
-        cache-dependency-glob: # optional, default is **/*requirements*.txt
-**/*requirements*.in
-**/*constraints*.txt
-**/*constraints*.in
-**/pyproject.toml
-**/uv.lock
-**/*.py.lock
+    - name: Install the project
+      run: uv sync --locked --all-extras --dev
 
     - name: Run tests
       run: uv run pytest app/tests
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        SECRET: ${{ secrets.SECRET }}
 
   frontend-check:
     runs-on: ubuntu-latest
