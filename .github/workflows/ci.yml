@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  backend-check:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./ecommerce-backend
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+
+    - name: astral-sh/setup-uv
+      uses: astral-sh/setup-uv@v7.2.0
+      with:
+        cache-dependency-glob: # optional, default is **/*requirements*.txt
+**/*requirements*.in
+**/*constraints*.txt
+**/*constraints*.in
+**/pyproject.toml
+**/uv.lock
+**/*.py.lock
+
+    - name: Run tests
+      run: uv run pytest app/tests
+
+  frontend-check:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./ecommerce-storefront
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22.18.0'
+
+    - uses: pnpm/action-setup@v2
+      with:
+        version: 9
+
+    - name: Install dependencies
+      run: pnpm install
+
+    - name: Lint
+      run: pnpm lint
+
+    - name: Build
+      run: pnpm build
