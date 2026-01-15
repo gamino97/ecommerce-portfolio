@@ -3,9 +3,10 @@ import logging
 import logging.config
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, status
+from fastapi.responses import JSONResponse
 
-from app.routers import carts, categories, customers, orders, products
+from app.routers import carts, categories, customers, health, orders, products
 from app.schemas import UserCreate, UserRead, UserUpdate
 from app.users import auth_backend, fastapi_users
 
@@ -38,6 +39,10 @@ tags_metadata = [
         "name": "carts",
         "description": "Manage shopping carts and cart items.",
     },
+    {
+        "name": "health",
+        "description": "Health check endpoints.",
+    },
 ]
 
 app = FastAPI(
@@ -48,6 +53,15 @@ app = FastAPI(
 )
 
 
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logger.error(f"Global exception: {exc}", exc_info=True)
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={"detail": "Internal Server Error"},
+    )
+
+
 config_file = Path("logging_config.json")
 with open(config_file) as f_in:
     config = json.load(f_in)
@@ -55,6 +69,7 @@ logging.config.dictConfig(config)
 logger = logging.getLogger("app")
 logger.info("Application startup complete.")
 
+app.include_router(health.router, tags=["health"])
 
 app.include_router(
     fastapi_users.get_auth_router(auth_backend),
