@@ -1,0 +1,28 @@
+services:
+
+  ecommerce-portfolio-backend:
+    image: ecommerce-portfolio-backend
+    expose:
+      - 5000
+    networks:
+      - postgresql_default
+      - nginx_default
+    secrets:
+      - DATABASE_URL
+      - SECRET
+
+    restart: always
+
+
+
+networks:
+  postgresql_default:
+    external: true
+  nginx_default:
+    external: true
+
+secrets:
+  DATABASE_URL:
+    file: ./.secrets/DATABASE_URL.txt
+  SECRET:
+    file: ./.secrets/SECRET.txt
