@@ -1,7 +1,8 @@
 import { cookies } from 'next/headers';
 import { ActionResponse, BackendValidationError } from '@/entities/api';
+import { getSecret } from '@/lib/getSecret';
 
-export const API_URL = process.env.API_URL;
+export const API_URL = getSecret("API_URL");
 
 export async function getHeaders() {
   const cookieStore = await cookies();

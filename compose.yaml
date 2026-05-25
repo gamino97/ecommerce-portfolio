@@ -1,0 +1,47 @@
+services:
+
+  ecommerce-portfolio-backend:
+    image: ecommerce-portfolio-backend
+    expose:
+      - 5000
+    networks:
+      - postgresql_default
+      - ecommerce-portfolio
+    secrets:
+      - DATABASE_URL
+      - SECRET
+    restart: unless-stopped
+
+  ecommerce-portfolio-storefront:
+    image: ecommerce-portfolio-storefront
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    networks:
+      - ecommerce-portfolio
+    secrets:
+      - API_URL
+      - SOURCE_GITHUB
+      - PERSONAL_WEBSITE
+
+
+networks:
+  postgresql_default:
+    external: true
+  ecommerce-portfolio:
+
+secrets:
+  DATABASE_URL:
+    file: ./.secrets/DATABASE_URL.txt
+  SECRET:
+    file: ./.secrets/SECRET.txt
+  API_URL:
+    file: ./.secrets/API_URL.txt
+  SOURCE_GITHUB:
+    file: ./.secrets/SOURCE_GITHUB.txt
+  PERSONAL_WEBSITE:
+    file: ./.secrets/PERSONAL_WEBSITE.txt
+
