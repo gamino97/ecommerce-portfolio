@@ -1,5 +1,8 @@
-
 FROM python:3.13.7-alpine AS base
+RUN addgroup -S myuser && adduser -S -G myuser myuser
+
+USER myuser
+
 COPY --from=ghcr.io/astral-sh/uv:0.11.15 /uv /uvx /bin/
 # Change the working directory to the `app` directory
 WORKDIR /app
@@ -11,7 +14,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-install-project
 
 # Copy the project into the image
-COPY . /app
+COPY --chown=myuser:myuser . /app
 
 # Sync the project
 RUN --mount=type=cache,target=/root/.cache/uv \
