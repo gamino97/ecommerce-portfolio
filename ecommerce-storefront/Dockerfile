@@ -38,6 +38,7 @@ RUN \
 
 # Production image, copy all the files and run next
 FROM base AS runner
+RUN apk add --no-cache curl
 WORKDIR /app
 
 ENV NODE_ENV=production

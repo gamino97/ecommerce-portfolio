@@ -3,7 +3,7 @@ services:
   ecommerce-portfolio-backend:
     image: ecommerce-portfolio-backend
     expose:
-      - 5000
+      - 80
     networks:
       - postgresql_default
       - ecommerce-portfolio
@@ -11,6 +11,12 @@ services:
       - DATABASE_URL
       - SECRET
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://127.0.0.1/health || exit 1"]
+      interval: 5m
+      timeout: 5s
+      retries: 5
+      start_period: 5s
 
   ecommerce-portfolio-storefront:
     image: ecommerce-portfolio-storefront
@@ -26,6 +32,15 @@ services:
       - API_URL
       - SOURCE_GITHUB
       - PERSONAL_WEBSITE
+    depends_on:
+      ecommerce-portfolio-backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://127.0.0.1:3000/ || exit 1"]
+      interval: 5m
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
 
 networks:

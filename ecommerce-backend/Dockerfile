@@ -1,4 +1,5 @@
 FROM python:3.13.7-alpine AS base
+RUN apk add --no-cache curl
 RUN addgroup -S myuser && adduser -S -G myuser myuser
 
 USER myuser
