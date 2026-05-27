@@ -1,24 +1,32 @@
 services:
 
   ecommerce-portfolio-backend:
-    image: ecommerce-portfolio-backend
-    expose:
-      - 5000
+    extends:
+      file: compose.yaml
+      service: ecommerce-portfolio-backend
+    
+
+  ecommerce-portfolio-storefront:
+    extends:
+      file: compose.yaml
+      service: ecommerce-portfolio-storefront
     networks:
-      - postgresql_default
       - nginx_default
-    secrets:
-      - DATABASE_URL
-      - SECRET
-
-    restart: always
-
+    ports: !reset []
+    volumes:
+      - nginx_ecommerce_portfolio_volume:/app/.next/static
 
 
 networks:
+  nginx_default:
+    external: true
   postgresql_default:
     external: true
-  nginx_default:
+  ecommerce-portfolio:
+
+
+volumes:
+  nginx_ecommerce_portfolio_volume:
     external: true
 
 secrets:
@@ -26,3 +34,9 @@ secrets:
     file: ./.secrets/DATABASE_URL.txt
   SECRET:
     file: ./.secrets/SECRET.txt
+  API_URL:
+    file: ./.secrets/API_URL.txt
+  SOURCE_GITHUB:
+    file: ./.secrets/SOURCE_GITHUB.txt
+  PERSONAL_WEBSITE:
+    file: ./.secrets/PERSONAL_WEBSITE.txt
