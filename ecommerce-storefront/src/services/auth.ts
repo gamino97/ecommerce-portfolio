@@ -2,7 +2,7 @@ import { LoginData, LoginResponse, RegisterData, User } from '@/entities/user';
 import { fetchApi, handleRequest } from './api';
 import { getSecret } from '@/lib/getSecret';
 
-const API_URL = getSecret("API_URL");
+const API_URL = getSecret('API_URL');
 
 export async function login(data: LoginData) {
   const params = new URLSearchParams();

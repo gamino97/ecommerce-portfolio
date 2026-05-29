@@ -36,7 +36,7 @@ export default function LandingPage() {
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
             <Link href="#features" className="hover:text-foreground transition-colors">Features</Link>
             <Link href="#stack" className="hover:text-foreground transition-colors">Tech Stack</Link>
-            <Link href={getSecret("GITHUB_URL")} target="_blank" className="hover:text-foreground transition-colors">GitHub</Link>
+            <Link href={getSecret('GITHUB_URL')} target="_blank" className="hover:text-foreground transition-colors">GitHub</Link>
           </nav>
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="sm" asChild>
@@ -74,7 +74,7 @@ export default function LandingPage() {
                 </Link>
               </Button>
               <Button size="lg" variant="outline" className="min-w-[160px] h-12 text-base" asChild>
-                <Link href={getSecret("SOURCE_GITHUB")} target="_blank">
+                <Link href={getSecret('SOURCE_GITHUB')} target="_blank">
                   View Source
                 </Link>
               </Button>
@@ -161,7 +161,7 @@ export default function LandingPage() {
             Carlos Gamino.
           </p>
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
-            <Link href={getSecret("PERSONAL_WEBSITE")} className="hover:text-foreground">About Me</Link>
+            <Link href={getSecret('PERSONAL_WEBSITE')} className="hover:text-foreground">About Me</Link>
           </div>
         </div>
       </footer>
